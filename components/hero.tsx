@@ -62,7 +62,7 @@ const Hero = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-purple-500/20 rounded-2xl blur-xl"></div>
             <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 shadow-2xl">
               <Image
-                src="/placeholder.svg?height=400&width=500"
+                src="/bg-hero.jpeg?height=400&width=500"
                 alt="Career illustration"
                 width={500}
                 height={400}
