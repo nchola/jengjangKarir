@@ -1,46 +1,40 @@
 "use client"
 
 import { ArticleCard } from "@/components/article-card"
+import type { Article } from "@/types/article"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ChevronRight } from "lucide-react"
 
-const articles = [
-  {
-    id: 1,
-    title: "Tips Membuat CV yang Menarik Perhatian Recruiter",
-    excerpt:
-      "Pelajari cara membuat CV yang efektif dan menonjol di antara ratusan lamaran lainnya dengan tips dari para HR profesional.",
-    image: "/placeholder.svg?height=192&width=384",
-    category: "Tips Karir",
-    author: "Budi Santoso",
-    date: "10 Apr 2023",
-  },
-  {
-    id: 2,
-    title: "Skill yang Paling Dicari di Industri Teknologi 2023",
-    excerpt:
-      "Mengenal berbagai keterampilan yang sedang tinggi permintaannya di industri teknologi dan bagaimana cara mempelajarinya.",
-    image: "/placeholder.svg?height=192&width=384",
-    category: "Teknologi",
-    author: "Dewi Lestari",
-    date: "5 Apr 2023",
-  },
-  {
-    id: 3,
-    title: "Cara Menjawab Pertanyaan Interview dengan Percaya Diri",
-    excerpt:
-      "Panduan lengkap menghadapi berbagai pertanyaan interview yang sering diajukan beserta contoh jawaban terbaiknya.",
-    image: "/placeholder.svg?height=192&width=384",
-    category: "Interview",
-    author: "Andi Wijaya",
-    date: "28 Mar 2023",
-  },
-]
+interface LatestArticlesProps {
+  articles: Article[]
+}
 
-const LatestArticles = () => {
+const LatestArticles = ({ articles }: LatestArticlesProps) => {
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-12 bg-gray-50 rounded-xl">
+        <p className="text-gray-500">Belum ada artikel</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {articles.map((article) => (
-        <ArticleCard key={article.id} {...article} />
-      ))}
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {articles.map((article) => (
+          <ArticleCard key={article.id} {...article} />
+        ))}
+      </div>
+
+      <div className="mt-8 text-center">
+        <Link href="/articles">
+          <Button variant="outline" className="px-8">
+            Lihat Semua Artikel
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
     </div>
   )
 }

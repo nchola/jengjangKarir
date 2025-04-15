@@ -26,49 +26,77 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("basic")
 
-  const validateForm = (formData: FormData) => {
-    const requiredFields = {
-      title: "Judul Lowongan",
-      company_id: "Perusahaan",
-      location: "Lokasi",
-      job_type: "Tipe Pekerjaan",
-      description: "Deskripsi Pekerjaan",
-    }
+  // Form data state to keep track of all fields across tabs
+  const [formData, setFormData] = useState({
+    title: job?.title || "",
+    company_id: job?.company_id?.toString() || "",
+    location: job?.location || "",
+    job_type: job?.job_type || "full-time",
+    salary_display: job?.salary_display || "",
+    category_id: job?.category_id?.toString() || "",
+    description: job?.description || "",
+    requirements: job?.requirements || "",
+    responsibilities: job?.responsibilities || "",
+    is_featured: job?.is_featured || false,
+    status: job?.status || "active",
+  })
 
-    const errors: string[] = []
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-    for (const [field, label] of Object.entries(requiredFields)) {
-      const value = formData.get(field)
-      if (!value || (typeof value === "string" && value.trim() === "")) {
-        errors.push(`${label} wajib diisi`)
-      }
-    }
+  // Handle select changes
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-    return errors
+  // Handle checkbox changes
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData((prev) => ({ ...prev, [name]: checked }))
+  }
+
+  // Handle tab change
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Validate required fields
+    if (!formData.title || !formData.company_id || !formData.location || !formData.job_type || !formData.description) {
+      toast({
+        title: "Validasi gagal",
+        description: "Semua field wajib diisi. Periksa semua tab form.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      const formData = new FormData(e.currentTarget)
-      const errors = validateForm(formData)
+      const formDataObj = new FormData()
 
-      if (errors.length > 0) {
-        toast({
-          title: "Validasi Gagal",
-          description: errors.join("\n"),
-          variant: "destructive",
-        })
-        return
-      }
+      // Add all form data to FormData object
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (typeof value === "boolean") {
+            // Handle checkbox values
+            formDataObj.append(key, value ? "on" : "off")
+          } else {
+            formDataObj.append(key, value.toString())
+          }
+        }
+      })
 
       let result
       if (job) {
-        result = await updateJob(job.id, formData)
+        result = await updateJob(job.id, formDataObj)
       } else {
-        result = await createJob(formData)
+        result = await createJob(formDataObj)
       }
 
       if (result.success) {
@@ -77,7 +105,6 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
           description: result.message,
         })
         router.push("/admin/jobs")
-        router.refresh()
       } else {
         toast({
           title: "Gagal",
@@ -99,7 +126,7 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="basic">Informasi Dasar</TabsTrigger>
           <TabsTrigger value="details">Detail Lowongan</TabsTrigger>
@@ -113,7 +140,8 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
               <Input
                 id="title"
                 name="title"
-                defaultValue={job?.title}
+                value={formData.title}
+                onChange={handleInputChange}
                 placeholder="Contoh: Senior Frontend Developer"
                 required
               />
@@ -121,7 +149,11 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="company_id">Perusahaan</Label>
-              <Select name="company_id" defaultValue={job?.company_id?.toString()}>
+              <Select
+                name="company_id"
+                value={formData.company_id}
+                onValueChange={(value) => handleSelectChange("company_id", value)}
+              >
                 <SelectTrigger id="company_id">
                   <SelectValue placeholder="Pilih perusahaan" />
                 </SelectTrigger>
@@ -140,7 +172,8 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
               <Input
                 id="location"
                 name="location"
-                defaultValue={job?.location}
+                value={formData.location}
+                onChange={handleInputChange}
                 placeholder="Contoh: Jakarta, Remote"
                 required
               />
@@ -148,7 +181,11 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="job_type">Tipe Pekerjaan</Label>
-              <Select name="job_type" defaultValue={job?.job_type || "full-time"}>
+              <Select
+                name="job_type"
+                value={formData.job_type}
+                onValueChange={(value) => handleSelectChange("job_type", value)}
+              >
                 <SelectTrigger id="job_type">
                   <SelectValue placeholder="Pilih tipe pekerjaan" />
                 </SelectTrigger>
@@ -168,14 +205,19 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
               <Input
                 id="salary_display"
                 name="salary_display"
-                defaultValue={job?.salary_display || ""}
+                value={formData.salary_display}
+                onChange={handleInputChange}
                 placeholder="Contoh: Rp 10-15 juta/bulan"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="category_id">Kategori</Label>
-              <Select name="category_id" defaultValue={job?.category_id?.toString() || ""}>
+              <Select
+                name="category_id"
+                value={formData.category_id}
+                onValueChange={(value) => handleSelectChange("category_id", value)}
+              >
                 <SelectTrigger id="category_id">
                   <SelectValue placeholder="Pilih kategori" />
                 </SelectTrigger>
@@ -197,7 +239,8 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
             <Textarea
               id="description"
               name="description"
-              defaultValue={job?.description || ""}
+              value={formData.description}
+              onChange={handleInputChange}
               placeholder="Deskripsi detail tentang posisi pekerjaan"
               rows={5}
               required
@@ -209,7 +252,8 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
             <Textarea
               id="requirements"
               name="requirements"
-              defaultValue={job?.requirements || ""}
+              value={formData.requirements}
+              onChange={handleInputChange}
               placeholder="Daftar persyaratan untuk posisi ini (satu per baris)"
               rows={5}
             />
@@ -220,7 +264,8 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
             <Textarea
               id="responsibilities"
               name="responsibilities"
-              defaultValue={job?.responsibilities || ""}
+              value={formData.responsibilities}
+              onChange={handleInputChange}
               placeholder="Daftar tanggung jawab untuk posisi ini (satu per baris)"
               rows={5}
             />
@@ -229,14 +274,22 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
 
         <TabsContent value="publish" className="space-y-6">
           <div className="flex items-center space-x-2">
-            <Checkbox id="is_featured" name="is_featured" defaultChecked={job?.is_featured} />
+            <Checkbox
+              id="is_featured"
+              checked={formData.is_featured}
+              onCheckedChange={(checked) => handleCheckboxChange("is_featured", checked as boolean)}
+            />
             <Label htmlFor="is_featured">Tampilkan sebagai lowongan unggulan</Label>
           </div>
 
           {job && (
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Select name="status" defaultValue={job.status}>
+              <Select
+                name="status"
+                value={formData.status}
+                onValueChange={(value) => handleSelectChange("status", value)}
+              >
                 <SelectTrigger id="status">
                   <SelectValue placeholder="Pilih status" />
                 </SelectTrigger>

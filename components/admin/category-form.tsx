@@ -19,6 +19,14 @@ export default function CategoryForm({ category }: CategoryFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedIcon, setSelectedIcon] = useState<string>(category?.icon || "🔍")
+  const [formData, setFormData] = useState({
+    name: category?.name || "",
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const icons = [
     "💻",
@@ -45,17 +53,27 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    if (!formData.name) {
+      toast({
+        title: "Validasi gagal",
+        description: "Nama kategori wajib diisi",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      const formData = new FormData(e.currentTarget)
-      formData.set("icon", selectedIcon)
+      const formDataObj = new FormData(e.currentTarget)
+      formDataObj.set("icon", selectedIcon)
 
       let result
       if (category) {
         // Implementasi update category jika diperlukan
       } else {
-        result = await createCategory(formData)
+        result = await createCategory(formDataObj)
       }
 
       if (result.success) {
@@ -87,7 +105,14 @@ export default function CategoryForm({ category }: CategoryFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Nama Kategori</Label>
-        <Input id="name" name="name" defaultValue={category?.name} placeholder="Nama kategori" required />
+        <Input
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          placeholder="Nama kategori"
+          required
+        />
       </div>
 
       <div className="space-y-2">

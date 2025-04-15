@@ -19,6 +19,15 @@ export default function CompanyForm({ company }: CompanyFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(company?.logo_url || null)
+  const [formData, setFormData] = useState({
+    name: company?.name || "",
+    location: company?.location || "",
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -33,16 +42,26 @@ export default function CompanyForm({ company }: CompanyFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    if (!formData.name) {
+      toast({
+        title: "Validasi gagal",
+        description: "Nama perusahaan wajib diisi",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      const formData = new FormData(e.currentTarget)
+      const formDataObj = new FormData(e.currentTarget)
 
       let result
       if (company) {
         // Implementasi update company jika diperlukan
       } else {
-        result = await createCompany(formData)
+        result = await createCompany(formDataObj)
       }
 
       if (result.success) {
@@ -74,12 +93,25 @@ export default function CompanyForm({ company }: CompanyFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Nama Perusahaan</Label>
-        <Input id="name" name="name" defaultValue={company?.name} placeholder="Nama perusahaan" required />
+        <Input
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          placeholder="Nama perusahaan"
+          required
+        />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="location">Lokasi</Label>
-        <Input id="location" name="location" defaultValue={company?.location || ""} placeholder="Lokasi perusahaan" />
+        <Input
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={handleInputChange}
+          placeholder="Lokasi perusahaan"
+        />
       </div>
 
       <div className="space-y-2">

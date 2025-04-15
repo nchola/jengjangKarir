@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { JobCard } from "@/components/job-card"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
-import { getSupabaseClient } from "@/lib/supabase"
+import { useSupabase } from "@/components/supabase-provider"
 import type { JobWithRelations } from "@/types/job"
 
 interface JobListProps {
@@ -17,6 +17,7 @@ const JobList = ({ initialJobs }: JobListProps) => {
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(initialJobs.length >= 5)
   const jobsPerPage = 5
+  const supabase = useSupabase()
 
   const loadMoreJobs = async () => {
     if (loading || !hasMore) return
@@ -24,7 +25,6 @@ const JobList = ({ initialJobs }: JobListProps) => {
     setLoading(true)
 
     try {
-      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from("jobs")
         .select(`

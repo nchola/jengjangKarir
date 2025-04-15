@@ -8,11 +8,17 @@ import Footer from "@/components/footer"
 import { SearchBar } from "@/components/search-bar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getCategories, getFeaturedJobs, getJobs } from "@/lib/actions"
+import { getFeaturedArticles } from "@/lib/article-actions"
 import JobCard from "@/components/job-card"
 
 export default async function Home() {
   // Ambil data dari Supabase
-  const [featuredJobs, latestJobs, categories] = await Promise.all([getFeaturedJobs(4), getJobs(), getCategories()])
+  const [featuredJobs, latestJobs, categories, featuredArticles] = await Promise.all([
+    getFeaturedJobs(4),
+    getJobs(),
+    getCategories(),
+    getFeaturedArticles(3),
+  ])
 
   return (
     <main className="min-h-screen bg-white">
@@ -90,7 +96,7 @@ export default async function Home() {
               </div>
             }
           >
-            <LatestArticles />
+            <LatestArticles articles={featuredArticles} />
           </Suspense>
         </section>
       </div>

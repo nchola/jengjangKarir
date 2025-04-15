@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Briefcase, Building, Tag, LayoutDashboard, FileText } from "lucide-react"
+import { Briefcase, Building, Tag, LayoutDashboard, FileText, Database, Activity } from "lucide-react"
 
 export default function AdminSidebar() {
   const pathname = usePathname()
@@ -33,6 +33,16 @@ export default function AdminSidebar() {
       name: "Artikel",
       href: "/admin/articles",
       icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      name: "Seed Database",
+      href: "/admin/seed",
+      icon: <Database className="h-5 w-5" />,
+    },
+    {
+      name: "Diagnostics",
+      href: "/admin/diagnostics",
+      icon: <Activity className="h-5 w-5" />,
     },
   ]
 
