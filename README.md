@@ -1,7 +1,6 @@
 # JengjangKarir
 
-A modern web application built with Next.js 15, React 19, and TypeScript, featuring a beautiful UI powered by Radix UI components and Tailwind CSS.
-
+JengjangKarir is a modern career platform built with cutting-edge technology to assist users in their career journey, combining modern features with an intuitive and responsive interface.
 ## 🚀 Features
 
 - Modern and responsive UI components using Radix UI
