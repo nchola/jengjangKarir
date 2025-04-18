@@ -82,18 +82,21 @@ export async function loginUser({
     await supabase.from("users").update({ last_login: new Date().toISOString() }).eq("id", user.id)
 
     // Set cookies for session
-    cookies().set("userLoggedIn", "true", {
+    const cookieStore = await cookies()
+    cookieStore.set("userLoggedIn", "true", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
+      sameSite: "lax"
     })
 
-    cookies().set("userId", user.id.toString(), {
+    cookieStore.set("userId", user.id.toString(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
+      sameSite: "lax"
     })
 
     return { success: true, message: "Login berhasil" }
@@ -105,15 +108,17 @@ export async function loginUser({
 
 // Logout user
 export async function logoutUser() {
-  cookies().delete("userLoggedIn")
-  cookies().delete("userId")
+  const cookieStore = await cookies()
+  cookieStore.delete("userLoggedIn")
+  cookieStore.delete("userId")
   revalidatePath("/")
   return { success: true }
 }
 
 // Get current user
 export async function getCurrentUser() {
-  const userId = cookies().get("userId")?.value
+  const cookieStore = await cookies()
+  const userId = cookieStore.get("userId")?.value
 
   if (!userId) {
     return null
@@ -121,7 +126,6 @@ export async function getCurrentUser() {
 
   try {
     const supabase = getSupabaseAdmin()
-
     const { data: user, error } = await supabase
       .from("users")
       .select(
@@ -143,7 +147,8 @@ export async function getCurrentUser() {
 
 // Update user profile
 export async function updateUserProfile(formData: FormData) {
-  const userId = cookies().get("userId")?.value
+  const cookieStore = await cookies()
+  const userId = cookieStore.get("userId")?.value
 
   if (!userId) {
     return { success: false, message: "Tidak terautentikasi" }

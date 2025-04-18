@@ -32,11 +32,13 @@ export async function loginAdmin(formData: FormData) {
     }
 
     // Set cookie untuk session
-    cookies().set("adminLoggedIn", "true", {
-      httpOnly: true,
+    const cookieStore = await cookies()
+    cookieStore.set("adminLoggedIn", "true", {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24, // 1 day
       path: "/",
+      sameSite: "lax"
     })
 
     return { success: true, message: "Login berhasil" }
@@ -48,8 +50,9 @@ export async function loginAdmin(formData: FormData) {
 
 // Fungsi untuk logout admin
 export async function logoutAdmin() {
-  cookies().delete("adminLoggedIn")
-  redirect("/admin/login")
+  const cookieStore = await cookies()
+  cookieStore.delete("adminLoggedIn")
+  return { success: true }
 }
 
 // Fungsi untuk membuat admin baru (hanya untuk setup awal)

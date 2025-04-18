@@ -16,6 +16,17 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Check if the path starts with /dashboard and is not the login page
+  if (path.startsWith("/dashboard") && path !== "/login") {
+    // Check if the user is authenticated by looking for the userLoggedIn cookie
+    const userLoggedIn = request.cookies.get("userLoggedIn")?.value
+
+    // If not authenticated, redirect to the login page
+    if (!userLoggedIn) {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+  }
+
   return NextResponse.next()
 }
 

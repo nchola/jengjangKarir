@@ -66,8 +66,9 @@ export async function getFeaturedJobs(limit = 4) {
 export async function getJobsByCategory(categorySlug: string) {
   try {
     const supabase = getSupabaseAdmin()
+    console.log("[Server Action] Getting jobs for category:", categorySlug)
 
-    // Dapatkan ID kategori dari slug
+    // Get category first
     const { data: category, error: categoryError } = await supabase
       .from("job_categories")
       .select("id")
@@ -75,11 +76,14 @@ export async function getJobsByCategory(categorySlug: string) {
       .single()
 
     if (categoryError || !category) {
-      console.error("Error fetching category:", categoryError)
+      console.error("[Server Action] Error getting category:", categoryError)
       return []
     }
 
-    const { data, error } = await supabase
+    console.log("[Server Action] Found category with ID:", category.id)
+
+    // Then get jobs for this category
+    const { data: jobs, error: jobsError } = await supabase
       .from("jobs")
       .select(`
         *,
@@ -87,16 +91,19 @@ export async function getJobsByCategory(categorySlug: string) {
         category:job_categories(*)
       `)
       .eq("category_id", category.id)
+      .eq("status", "active")
+      .order("is_featured", { ascending: false })
       .order("posted_at", { ascending: false })
 
-    if (error) {
-      console.error("Error fetching jobs by category:", error)
+    if (jobsError) {
+      console.error("[Server Action] Error getting jobs:", jobsError)
       return []
     }
 
-    return data || []
+    console.log("[Server Action] Found jobs:", jobs?.length || 0)
+    return jobs || []
   } catch (error) {
-    console.error("Unexpected error fetching jobs by category:", error)
+    console.error("[Server Action] Error getting jobs by category:", error)
     return []
   }
 }

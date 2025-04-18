@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, LayoutDashboard, Briefcase, Building, Tag, FileText, Database, Activity, LogOut } from "lucide-react"
+import { Menu, X, LayoutDashboard, Briefcase, Building, Tag, FileText, Database, Activity, LogOut, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter } from "next/navigation"
@@ -79,6 +79,10 @@ export default function AdminLayoutClient({ children }: AdminLayoutProps) {
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="admin-mobile-button" onClick={() => window.open("/", "_blank")}>
+              <ExternalLink className="h-4 w-4 mr-2 admin-mobile-icon" />
+              <span className="admin-mobile-text">Lihat Website</span>
+            </Button>
             <Button variant="outline" size="sm" className="admin-mobile-button" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2 admin-mobile-icon" />
               <span className="admin-mobile-text">Logout</span>

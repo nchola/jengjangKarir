@@ -7,6 +7,8 @@ import JobFilters from "@/components/job-filters"
 import JobList from "@/components/job-list"
 import { getJobsByCategory, getCategories } from "@/lib/actions"
 import { Suspense } from "react"
+import { FilterProvider } from "@/components/filter-provider"
+import { FilterChips } from "@/components/filter-chips"
 
 export default async function JobCategoryPage({ params }: { params: { slug: string } }) {
   // Ambil data lowongan berdasarkan kategori
@@ -30,29 +32,33 @@ export default async function JobCategoryPage({ params }: { params: { slug: stri
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-1/4">
-            <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
-              <JobFilters categories={categories} />
-            </Suspense>
-          </div>
+      <FilterProvider filterType="job">
+        <div className="container mx-auto px-4 py-8">
+          <FilterChips />
+          
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="w-full md:w-1/4">
+              <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
+                <JobFilters categories={categories} />
+              </Suspense>
+            </div>
 
-          <div className="w-full md:w-3/4">
-            <Suspense
-              fallback={
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-40 w-full" />
-                  ))}
-                </div>
-              }
-            >
-              <JobList initialJobs={jobs} />
-            </Suspense>
+            <div className="w-full md:w-3/4">
+              <Suspense
+                fallback={
+                  <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-40 w-full" />
+                    ))}
+                  </div>
+                }
+              >
+                <JobList initialJobs={jobs} />
+              </Suspense>
+            </div>
           </div>
         </div>
-      </div>
+      </FilterProvider>
 
       <Footer />
     </main>
