@@ -66,7 +66,7 @@ export default function DatabaseStatus() {
                 <ol className="list-decimal ml-5 mt-1 space-y-1">
                   <li>Verify your Supabase URL and API keys are correct</li>
                   <li>Check if your Supabase project is active and running</li>
-                  <li>Ensure your IP is allowed in Supabase's security settings</li>
+                  <li>Ensure your IP is allowed in Supabase&apos;s security settings</li>
                   <li>Try refreshing the page or logging out and back in</li>
                 </ol>
               </div>

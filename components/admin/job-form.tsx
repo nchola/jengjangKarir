@@ -339,7 +339,7 @@ export default function JobForm({ job, categories, companies }: JobFormProps) {
                   placeholder="Contoh: Rp 10-15 juta/bulan"
                 />
                 <p className="text-xs text-gray-500">
-                  Masukkan informasi gaji dalam format yang mudah dibaca, misalnya "Rp 10-15 juta/bulan"
+                  Masukkan informasi gaji dalam format yang mudah dibaca, misalnya &quot;Rp 10-15 juta/bulan&quot;
                 </p>
               </div>
             </div>
