@@ -6,10 +6,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
 import type { SupabaseClient } from "@supabase/supabase-js"
-
-// URLs and keys - use environment variables with fallbacks for preview
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://btwgqfqfxddqrquzyvro.supabase.co"
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0d2dxZnFmeGRkcXJxdXp5dnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODYwNzksImV4cCI6MjA2MDM2MjA3OX0.WqLNF4pxVDClkwbLXxXo6z3WE_VXK9fhy-x0FaItQvE"
+import { config, validateConfig } from "@/lib/config"
 
 // Create a context for the Supabase client
 type SupabaseContext = {
@@ -22,19 +19,20 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
 
 // Create a single instance of the Supabase client
 const createSupabaseClient = () => {
-  console.log("Creating Supabase client with URL:", supabaseUrl ? supabaseUrl.substring(0, 20) + "..." : "Not set")
-  console.log("Supabase Anon Key available:", !!supabaseAnonKey)
+  const { url, anonKey } = config.supabase
+  
+  console.log("Creating Supabase client with URL:", url ? url.substring(0, 20) + "..." : "Not set")
+  console.log("Supabase Anon Key available:", !!anonKey)
 
   try {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn("Supabase URL or Anon Key not provided. Creating minimal client.")
-      // Create a minimal client that won't crash but will fail gracefully
+    if (!validateConfig()) {
+      console.warn("Supabase configuration is invalid. Creating minimal client.")
       return createClient<Database>("https://example.supabase.co", "dummy-key", {
         auth: { persistSession: false },
       })
     }
 
-    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    return createClient<Database>(url!, anonKey!, {
       auth: {
         persistSession: true,
         storageKey: "supabase.auth.token",
@@ -42,8 +40,7 @@ const createSupabaseClient = () => {
     })
   } catch (error) {
     console.error("Error creating Supabase client:", error)
-    // Return a minimal client that won't crash the app
-    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    return createClient<Database>("https://example.supabase.co", "dummy-key", {
       auth: { persistSession: false },
     })
   }
