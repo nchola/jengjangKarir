@@ -50,41 +50,32 @@ export function FilterProvider({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-
-  // Gunakan useRef untuk melacak apakah ini adalah render pertama
-  const isFirstRender = useRef(true)
-
-  // State untuk menyimpan nilai filter
-  const [filterValues, setFilterValues] = useState<FilterValues>({})
-
-  // State untuk menandai apakah filter telah berubah sejak terakhir diterapkan
+  const [filterValues, setFilterValues] = useState<FilterValues>(initialFilters)
   const [isFilterChanged, setIsFilterChanged] = useState(false)
+  const initialRender = useRef(true)
 
-  // Inisialisasi filter dari URL saat komponen dimuat
+  // Update filter values when URL changes
   useEffect(() => {
-    if (isFirstRender.current) {
-      const params: FilterValues = {}
-
-      // Ekstrak semua parameter dari URL
-      for (const [key, value] of searchParams.entries()) {
-        // Handle multi-value parameters (arrays)
-        if (params[key] !== undefined) {
-          if (Array.isArray(params[key])) {
-            ;(params[key] as string[]).push(value)
-          } else {
-            params[key] = [params[key] as string, value]
-          }
-        } else {
-          params[key] = value
-        }
-      }
-
-      // Gabungkan dengan initial filters jika ada
-      setFilterValues({ ...initialFilters, ...params })
-      setIsFilterChanged(false)
-      isFirstRender.current = false
+    if (initialRender.current) {
+      initialRender.current = false
+      return
     }
-  }, [searchParams, initialFilters])
+
+    const newFilters: FilterValues = {}
+    for (const [key, value] of searchParams.entries()) {
+      if (key === "q") {
+        newFilters.q = value
+      } else if (key === "page") {
+        newFilters.page = value
+      } else {
+        // Handle array values
+        const values = searchParams.getAll(key)
+        newFilters[key] = values.length > 1 ? values : values[0]
+      }
+    }
+    setFilterValues(newFilters)
+    setIsFilterChanged(false)
+  }, [searchParams])
 
   // Fungsi untuk mengatur nilai filter tunggal
   const setFilter = useCallback((key: string, value: string | string[] | undefined) => {
@@ -135,33 +126,36 @@ export function FilterProvider({
     const query = filterValues.q
     setFilterValues(query ? { q: query } : {})
     setIsFilterChanged(true)
-  }, [filterValues.q])
+    
+    // Update URL
+    const params = new URLSearchParams()
+    if (query) params.set("q", query)
+    router.push(`${pathname}?${params.toString()}`)
+  }, [filterValues.q, pathname, router])
 
-  // Fungsi untuk menerapkan filter ke URL
+  // Fungsi untuk menerapkan filter
   const applyFilters = useCallback(() => {
-    // Buat objek URLSearchParams baru
     const params = new URLSearchParams()
 
-    // Tambahkan setiap filter ke params
+    // Tambahkan query pencarian jika ada
+    if (filterValues.q) {
+      params.set("q", filterValues.q)
+    }
+
+    // Tambahkan filter lainnya
     Object.entries(filterValues).forEach(([key, value]) => {
-      if (value !== undefined) {
-        if (Array.isArray(value)) {
-          // Handle array values
-          value.forEach((v) => {
-            if (v && v.trim() !== "") {
-              params.append(key, v)
-            }
-          })
-        } else if (typeof value === "string" && value.trim() !== "") {
-          params.set(key, value)
-        }
+      if (key === "q" || key === "page") return
+
+      if (Array.isArray(value)) {
+        value.forEach((v) => params.append(key, v))
+      } else if (value) {
+        params.set(key, value)
       }
     })
 
-    // Update URL dengan parameter baru
     router.push(`${pathname}?${params.toString()}`)
     setIsFilterChanged(false)
-  }, [pathname, router, filterValues])
+  }, [filterValues, pathname, router])
 
   // Hitung jumlah filter aktif (tidak termasuk query pencarian dan pagination)
   const activeFilterCount = useMemo(() => {

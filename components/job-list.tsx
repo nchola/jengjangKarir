@@ -34,7 +34,7 @@ const JobList = ({ initialJobs }: JobListProps) => {
     setLoading(true)
 
     try {
-      // Build the query with filters
+      // Build the base query
       let queryBuilder = supabase
         .from("jobs")
         .select(`
@@ -46,52 +46,33 @@ const JobList = ({ initialJobs }: JobListProps) => {
         .order("posted_at", { ascending: false })
         .range(page * jobsPerPage, (page + 1) * jobsPerPage - 1)
 
-      // Apply filters based on search parameters
+      // Apply filters only if they exist
       if (filterValues.q) {
         queryBuilder = queryBuilder.or(`title.ilike.%${filterValues.q}%,companies.name.ilike.%${filterValues.q}%`)
       }
 
-      // Filter berdasarkan lokasi
       if (filterValues.location) {
-        if (Array.isArray(filterValues.location)) {
-          if (filterValues.location.length === 1) {
-            queryBuilder = queryBuilder.ilike("location", `%${filterValues.location[0]}%`)
-          } else if (filterValues.location.length > 1) {
-            const locationFilters = filterValues.location.map((loc) => `location.ilike.%${loc}%`)
-            queryBuilder = queryBuilder.or(locationFilters.join(","))
-          }
-        } else {
-          queryBuilder = queryBuilder.ilike("location", `%${filterValues.location}%`)
-        }
+        const locations = Array.isArray(filterValues.location) 
+          ? filterValues.location 
+          : [filterValues.location]
+        const locationFilters = locations.map(loc => `location.ilike.%${loc}%`)
+        queryBuilder = queryBuilder.or(locationFilters.join(","))
       }
 
-      // Filter berdasarkan tipe pekerjaan
       if (filterValues.job_type) {
-        if (Array.isArray(filterValues.job_type)) {
-          if (filterValues.job_type.length === 1) {
-            queryBuilder = queryBuilder.eq("job_type", filterValues.job_type[0])
-          } else if (filterValues.job_type.length > 1) {
-            queryBuilder = queryBuilder.in("job_type", filterValues.job_type)
-          }
-        } else if (filterValues.job_type !== "all") {
-          queryBuilder = queryBuilder.eq("job_type", filterValues.job_type)
-        }
+        const jobTypes = Array.isArray(filterValues.job_type)
+          ? filterValues.job_type
+          : [filterValues.job_type]
+        queryBuilder = queryBuilder.in("job_type", jobTypes)
       }
 
-      // Filter berdasarkan kategori
       if (filterValues.category) {
-        if (Array.isArray(filterValues.category)) {
-          if (filterValues.category.length === 1) {
-            queryBuilder = queryBuilder.eq("category_id", filterValues.category[0])
-          } else if (filterValues.category.length > 1) {
-            queryBuilder = queryBuilder.in("category_id", filterValues.category)
-          }
-        } else {
-          queryBuilder = queryBuilder.eq("category_id", filterValues.category)
-        }
+        const categories = Array.isArray(filterValues.category)
+          ? filterValues.category
+          : [filterValues.category]
+        queryBuilder = queryBuilder.in("category_id", categories)
       }
 
-      // Filter berdasarkan gaji
       if (filterValues.salary_min) {
         queryBuilder = queryBuilder.gte("salary_min", Number.parseInt(filterValues.salary_min) * 1000000)
       }
@@ -118,46 +99,32 @@ const JobList = ({ initialJobs }: JobListProps) => {
     }
   }, [loading, hasMore, supabase, page, jobsPerPage, filterValues])
 
-  // Implement infinite scroll with useCallback to prevent infinite loop
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 500 &&
-        !loading &&
-        hasMore
-      ) {
-        loadMoreJobs()
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [loadMoreJobs, loading, hasMore])
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Menampilkan {jobs.length} lowongan</h2>
-        <div className="text-sm text-gray-500">
-          Urutkan: <span className="font-medium text-blue-600">Terbaru</span>
-        </div>
-      </div>
-
-      {jobs.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <p className="text-gray-500">Tidak ada lowongan yang tersedia dengan kriteria pencarian ini</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {jobs.map((job) => (
-            <JobCard key={job.id} {...job} />
-          ))}
-        </div>
-      )}
+    <div className="space-y-6">
+      {jobs.map((job) => (
+        <JobCard
+          key={job.id}
+          id={job.id}
+          title={job.title}
+          company={job.company}
+          location={job.location}
+          job_type={job.job_type}
+          salary_display={job.salary_display}
+          show_salary={job.show_salary}
+          posted_at={job.posted_at}
+          is_featured={job.is_featured}
+          slug={job.slug}
+        />
+      ))}
 
       {hasMore && (
-        <div className="mt-8 text-center">
-          <Button onClick={loadMoreJobs} disabled={loading} className="px-8">
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={loadMoreJobs}
+            disabled={loading}
+            className="w-full md:w-auto"
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -167,6 +134,12 @@ const JobList = ({ initialJobs }: JobListProps) => {
               "Muat Lebih Banyak"
             )}
           </Button>
+        </div>
+      )}
+
+      {!loading && jobs.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Tidak ada lowongan yang ditemukan</p>
         </div>
       )}
     </div>
