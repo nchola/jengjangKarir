@@ -10,6 +10,13 @@ export default function DatabaseStatus() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showSetupGuide, setShowSetupGuide] = useState(false)
 
+  // Only show on diagnostics page
+  const isDiagnosticsPage = typeof window !== "undefined" && window.location.pathname.includes("/admin/diagnostics")
+
+  if (!isDiagnosticsPage) {
+    return null
+  }
+
   if (isConnected && !error) {
     return (
       <div className="flex items-center text-sm text-green-600">
@@ -108,6 +115,9 @@ CREATE TABLE companies (
   slug VARCHAR(255) UNIQUE NOT NULL,
   logo_url TEXT,
   location VARCHAR(255),
+  website TEXT,
+  company_size TEXT,
+  background TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -137,31 +147,15 @@ CREATE TABLE jobs (
   is_featured BOOLEAN DEFAULT FALSE,
   status VARCHAR(50) DEFAULT 'active',
   posted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  expires_at TIMESTAMP WITH TIME ZONE
+  expires_at TIMESTAMP WITH TIME ZONE,
+  show_salary BOOLEAN DEFAULT TRUE,
+  company_background TEXT
 );`}
                   </pre>
                 </li>
-
-                <li>
-                  <p className="font-medium">Use Mock Data for Development</p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    While setting up your database, the application will use mock data so you can continue development.
-                  </p>
-                </li>
               </ol>
-
-              <div className="mt-3 text-xs text-gray-500">
-                <p>
-                  Note: The application is currently using mock data, so you can continue using it without a database
-                  connection.
-                </p>
-              </div>
             </div>
           )}
-
-          <p className="text-sm text-red-600 mt-2">
-            The application is currently using mock data, so you can continue using it without a database connection.
-          </p>
         </div>
       </div>
     </div>

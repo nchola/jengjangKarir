@@ -3,17 +3,6 @@
 import { revalidatePath } from "next/cache"
 import { getSupabaseAdmin } from "./supabase"
 import { slugify } from "./utils"
-import {
-  getMockJobs,
-  getMockFeaturedJobs,
-  getMockJobBySlug,
-  getMockCategories,
-  getMockCompanies,
-  createMockJob,
-  createMockCompany,
-  createMockCategory,
-  mockJobs,
-} from "./mock-data"
 
 // Fungsi untuk mengambil semua lowongan
 export async function getJobs() {
@@ -32,16 +21,14 @@ export async function getJobs() {
 
     if (error) {
       console.error("Error fetching jobs:", error)
-      console.log("Falling back to mock data")
-      return getMockJobs()
+      return []
     }
 
     console.log(`Server action: Found ${data?.length || 0} jobs`)
     return data || []
   } catch (error) {
     console.error("Unexpected error fetching jobs:", error)
-    console.log("Falling back to mock data")
-    return getMockJobs()
+    return []
   }
 }
 
@@ -64,16 +51,14 @@ export async function getFeaturedJobs(limit = 4) {
 
     if (error) {
       console.error("Error fetching featured jobs:", error)
-      console.log("Falling back to mock data")
-      return getMockFeaturedJobs(limit)
+      return []
     }
 
     console.log(`Server action: Found ${data?.length || 0} featured jobs`)
     return data || []
   } catch (error) {
     console.error("Unexpected error fetching featured jobs:", error)
-    console.log("Falling back to mock data")
-    return getMockFeaturedJobs(limit)
+    return []
   }
 }
 
@@ -91,8 +76,7 @@ export async function getJobsByCategory(categorySlug: string) {
 
     if (categoryError || !category) {
       console.error("Error fetching category:", categoryError)
-      // Return mock jobs filtered by category
-      return getMockJobs().filter((job) => job.category?.slug === categorySlug)
+      return []
     }
 
     const { data, error } = await supabase
@@ -107,15 +91,13 @@ export async function getJobsByCategory(categorySlug: string) {
 
     if (error) {
       console.error("Error fetching jobs by category:", error)
-      // Return mock jobs filtered by category
-      return getMockJobs().filter((job) => job.category?.slug === categorySlug)
+      return []
     }
 
     return data || []
   } catch (error) {
     console.error("Unexpected error fetching jobs by category:", error)
-    // Return mock jobs filtered by category
-    return getMockJobs().filter((job) => job.category?.slug === categorySlug)
+    return []
   }
 }
 
@@ -136,15 +118,13 @@ export async function getJobBySlug(slug: string) {
 
     if (error) {
       console.error("Error fetching job:", error)
-      console.log("Falling back to mock data")
-      return getMockJobBySlug(slug)
+      return null
     }
 
     return data
   } catch (error) {
     console.error("Unexpected error fetching job by slug:", error)
-    console.log("Falling back to mock data")
-    return getMockJobBySlug(slug)
+    return null
   }
 }
 
@@ -158,16 +138,14 @@ export async function getCategories() {
 
     if (error) {
       console.error("Error fetching categories:", error)
-      console.log("Falling back to mock data")
-      return getMockCategories()
+      return []
     }
 
     console.log(`Server action: Found ${data?.length || 0} categories`)
     return data || []
   } catch (error) {
     console.error("Unexpected error fetching categories:", error)
-    console.log("Falling back to mock data")
-    return getMockCategories()
+    return []
   }
 }
 
@@ -181,16 +159,14 @@ export async function getCompanies() {
 
     if (error) {
       console.error("Error fetching companies:", error)
-      console.log("Falling back to mock data")
-      return getMockCompanies()
+      return []
     }
 
     console.log(`Server action: Found ${data?.length || 0} companies`)
     return data || []
   } catch (error) {
     console.error("Unexpected error fetching companies:", error)
-    console.log("Falling back to mock data")
-    return getMockCompanies()
+    return []
   }
 }
 
@@ -213,21 +189,29 @@ export async function createCompany(formData: FormData) {
     // Upload logo jika ada
     let logoUrl = null
     if (logoFile && logoFile.size > 0) {
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("company-logos")
-        .upload(`${slug}-${Date.now()}`, logoFile)
+      try {
+        // Try to upload to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("company-logos")
+          .upload(`${slug}-${Date.now()}`, logoFile)
 
-      if (uploadError) {
-        console.error("Error uploading logo:", uploadError)
-        return { success: false, message: "Gagal mengupload logo" }
+        if (uploadError) {
+          console.error("Error uploading logo:", uploadError)
+          // If bucket doesn't exist, use a placeholder image instead
+          logoUrl = `/placeholder.svg?height=64&width=64&text=${encodeURIComponent(name.charAt(0))}`
+        } else {
+          // Dapatkan URL publik
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("company-logos").getPublicUrl(uploadData.path)
+
+          logoUrl = publicUrl
+        }
+      } catch (uploadErr) {
+        console.error("Upload error:", uploadErr)
+        // Fallback to placeholder
+        logoUrl = `/placeholder.svg?height=64&width=64&text=${encodeURIComponent(name.charAt(0))}`
       }
-
-      // Dapatkan URL publik
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("company-logos").getPublicUrl(uploadData.path)
-
-      logoUrl = publicUrl
     }
 
     // Simpan data perusahaan
@@ -243,16 +227,88 @@ export async function createCompany(formData: FormData) {
 
     if (error) {
       console.error("Error creating company:", error)
-      console.log("Falling back to mock data")
-      return createMockCompany(formData)
+      return { success: false, message: `Gagal membuat perusahaan: ${error.message}` }
     }
 
     revalidatePath("/admin/companies")
     return { success: true, message: "Perusahaan berhasil dibuat", data: data[0] }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error creating company:", error)
-    console.log("Falling back to mock data")
-    return createMockCompany(formData)
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
+  }
+}
+
+// Fungsi untuk mengupdate perusahaan
+export async function updateCompany(id: number, formData: FormData) {
+  try {
+    const supabase = getSupabaseAdmin()
+
+    const name = formData.get("name") as string
+    const location = formData.get("location") as string
+    const logoFile = formData.get("logo") as File
+    const resetLogo = formData.get("reset_logo") === "true"
+
+    if (!name) {
+      return { success: false, message: "Nama perusahaan wajib diisi" }
+    }
+
+    // Get current company data
+    const { data: currentCompany } = await supabase.from("companies").select("logo_url").eq("id", id).single()
+
+    // Generate slug dari nama
+    const slug = slugify(name)
+
+    // Prepare update data
+    const updateData: any = {
+      name,
+      slug,
+      location,
+    }
+
+    // Reset logo if requested
+    if (resetLogo) {
+      updateData.logo_url = null
+    }
+    // Upload new logo if provided
+    else if (logoFile && logoFile.size > 0) {
+      try {
+        // Try to upload to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("company-logos")
+          .upload(`${slug}-${Date.now()}`, logoFile)
+
+        if (uploadError) {
+          console.error("Error uploading logo:", uploadError)
+          // If bucket doesn't exist, use a placeholder image instead
+          updateData.logo_url = `/placeholder.svg?height=64&width=64&text=${encodeURIComponent(name.charAt(0))}`
+        } else {
+          // Dapatkan URL publik
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("company-logos").getPublicUrl(uploadData.path)
+
+          updateData.logo_url = publicUrl
+        }
+      } catch (uploadErr) {
+        console.error("Upload error:", uploadErr)
+        // Fallback to placeholder
+        updateData.logo_url = `/placeholder.svg?height=64&width=64&text=${encodeURIComponent(name.charAt(0))}`
+      }
+    }
+
+    // Update company data
+    const { data, error } = await supabase.from("companies").update(updateData).eq("id", id).select()
+
+    if (error) {
+      console.error("Error updating company:", error)
+      return { success: false, message: `Gagal mengupdate perusahaan: ${error.message}` }
+    }
+
+    revalidatePath("/admin/companies")
+    return { success: true, message: "Perusahaan berhasil diupdate", data: data[0] }
+  } catch (error: any) {
+    console.error("Unexpected error updating company:", error)
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
   }
 }
 
@@ -284,29 +340,68 @@ export async function createCategory(formData: FormData) {
 
     if (error) {
       console.error("Error creating category:", error)
-      console.log("Falling back to mock data")
-      return createMockCategory(formData)
+      return { success: false, message: `Gagal membuat kategori: ${error.message}` }
     }
 
     revalidatePath("/admin/categories")
     return { success: true, message: "Kategori berhasil dibuat", data: data[0] }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error creating category:", error)
-    console.log("Falling back to mock data")
-    return createMockCategory(formData)
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
   }
 }
 
-// Fungsi untuk membuat lowongan baru
+// Fungsi untuk mengupdate kategori
+export async function updateCategory(id: number, formData: FormData) {
+  try {
+    const supabase = getSupabaseAdmin()
+
+    const name = formData.get("name") as string
+    const icon = formData.get("icon") as string
+
+    if (!name) {
+      return { success: false, message: "Nama kategori wajib diisi" }
+    }
+
+    // Generate slug dari nama
+    const slug = slugify(name)
+
+    // Update data kategori
+    const { data, error } = await supabase
+      .from("job_categories")
+      .update({
+        name,
+        slug,
+        icon,
+      })
+      .eq("id", id)
+      .select()
+
+    if (error) {
+      console.error("Error updating category:", error)
+      return { success: false, message: `Gagal mengupdate kategori: ${error.message}` }
+    }
+
+    revalidatePath("/admin/categories")
+    return { success: true, message: "Kategori berhasil diupdate", data: data[0] }
+  } catch (error: any) {
+    console.error("Unexpected error updating category:", error)
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
+  }
+}
+
+// Update the createJob function to handle the show_salary field
 export async function createJob(formData: FormData) {
   try {
     const supabase = getSupabaseAdmin()
+    const now = new Date()
 
     const title = formData.get("title") as string
     const companyId = Number.parseInt(formData.get("company_id") as string)
     const location = formData.get("location") as string
     const jobType = formData.get("job_type") as string
     const salaryDisplay = formData.get("salary_display") as string
+    const showSalary = formData.get("show_salary") === "on"
     const description = formData.get("description") as string
     const requirements = formData.get("requirements") as string
     const responsibilities = formData.get("responsibilities") as string
@@ -330,21 +425,21 @@ export async function createJob(formData: FormData) {
         location,
         job_type: jobType,
         salary_display: salaryDisplay,
+        show_salary: showSalary,
         description,
         requirements,
         responsibilities,
         category_id: categoryId,
         is_featured: isFeatured,
         status: "active",
-        posted_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 hari
+        posted_at: now.toISOString(),
+        expires_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 hari
       })
       .select()
 
     if (error) {
       console.error("Error creating job:", error)
-      console.log("Falling back to mock data")
-      return createMockJob(formData)
+      return { success: false, message: `Gagal membuat lowongan: ${error.message}` }
     }
 
     // Update job count for the category if a category was selected
@@ -363,14 +458,13 @@ export async function createJob(formData: FormData) {
     revalidatePath("/jobs")
     revalidatePath("/")
     return { success: true, message: "Lowongan berhasil dibuat", data: data[0] }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error creating job:", error)
-    console.log("Falling back to mock data")
-    return createMockJob(formData)
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
   }
 }
 
-// Fungsi untuk mengupdate lowongan
+// Update the updateJob function to handle the show_salary field
 export async function updateJob(id: number, formData: FormData) {
   try {
     const supabase = getSupabaseAdmin()
@@ -383,6 +477,7 @@ export async function updateJob(id: number, formData: FormData) {
     const location = formData.get("location") as string
     const jobType = formData.get("job_type") as string
     const salaryDisplay = formData.get("salary_display") as string
+    const showSalary = formData.get("show_salary") === "on"
     const description = formData.get("description") as string
     const requirements = formData.get("requirements") as string
     const responsibilities = formData.get("responsibilities") as string
@@ -394,15 +489,20 @@ export async function updateJob(id: number, formData: FormData) {
       return { success: false, message: "Semua field wajib diisi" }
     }
 
+    // Generate slug dari judul
+    const slug = slugify(title)
+
     // Update data lowongan
     const { data, error } = await supabase
       .from("jobs")
       .update({
         title,
+        slug,
         company_id: companyId,
         location,
         job_type: jobType,
         salary_display: salaryDisplay,
+        show_salary: showSalary,
         description,
         requirements,
         responsibilities,
@@ -415,43 +515,23 @@ export async function updateJob(id: number, formData: FormData) {
 
     if (error) {
       console.error("Error updating job:", error)
-      // For mock data, find and update the job
-      const jobIndex = mockJobs.findIndex((job) => job.id === id)
-      if (jobIndex !== -1) {
-        const updatedJob = {
-          ...mockJobs[jobIndex],
-          title,
-          company_id: companyId,
-          location,
-          job_type: jobType,
-          salary_display: salaryDisplay,
-          description,
-          requirements,
-          responsibilities,
-          category_id: categoryId,
-          is_featured: isFeatured,
-          status,
-        }
-        mockJobs[jobIndex] = updatedJob
-        return { success: true, message: "Lowongan berhasil diupdate (mock)", data: updatedJob }
-      }
-      return { success: false, message: "Gagal mengupdate lowongan: " + error.message }
+      return { success: false, message: `Gagal mengupdate lowongan: ${error.message}` }
     }
 
     // Update job counts for categories if category changed
     if (currentJob && currentJob.category_id !== categoryId) {
       // Decrement old category count
       if (currentJob.category_id) {
-        const { data: oldCategory } = await supabase
+        const { data: oldCategoryData } = await supabase
           .from("job_categories")
           .select("job_count")
           .eq("id", currentJob.category_id)
           .single()
 
-        if (oldCategory && oldCategory.job_count > 0) {
+        if (oldCategoryData && oldCategoryData.job_count > 0) {
           await supabase
             .from("job_categories")
-            .update({ job_count: oldCategory.job_count - 1 })
+            .update({ job_count: oldCategoryData.job_count - 1 })
             .eq("id", currentJob.category_id)
         }
       }
@@ -478,9 +558,9 @@ export async function updateJob(id: number, formData: FormData) {
     revalidatePath("/jobs")
     revalidatePath("/")
     return { success: true, message: "Lowongan berhasil diupdate", data: data[0] }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error updating job:", error)
-    return { success: false, message: "Terjadi kesalahan yang tidak terduga" }
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
   }
 }
 
@@ -496,13 +576,7 @@ export async function deleteJob(id: number) {
 
     if (error) {
       console.error("Error deleting job:", error)
-      // For mock data, filter out the job
-      const jobIndex = mockJobs.findIndex((job) => job.id === id)
-      if (jobIndex !== -1) {
-        mockJobs.splice(jobIndex, 1)
-        return { success: true, message: "Lowongan berhasil dihapus (mock)" }
-      }
-      return { success: false, message: "Gagal menghapus lowongan: " + error.message }
+      return { success: false, message: `Gagal menghapus lowongan: ${error.message}` }
     }
 
     // Update category job count
@@ -525,16 +599,24 @@ export async function deleteJob(id: number) {
     revalidatePath("/jobs")
     revalidatePath("/")
     return { success: true, message: "Lowongan berhasil dihapus" }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Unexpected error deleting job:", error)
-    return { success: false, message: "Terjadi kesalahan yang tidak terduga" }
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
   }
 }
 
 // Fungsi untuk mencari lowongan
-export async function searchJobs(query: string, location?: string, jobType?: string) {
+export async function searchJobs(
+  query?: string,
+  location?: string | string[],
+  jobType?: string | string[],
+  categoryId?: string | string[],
+  salaryMin?: string,
+  salaryMax?: string,
+) {
   try {
     const supabase = getSupabaseAdmin()
+    console.log("Searching jobs with params:", { query, location, jobType, categoryId, salaryMin, salaryMax })
 
     let queryBuilder = supabase
       .from("jobs")
@@ -546,42 +628,103 @@ export async function searchJobs(query: string, location?: string, jobType?: str
       .eq("status", "active")
       .order("posted_at", { ascending: false })
 
-    // Filter berdasarkan query
-    if (query) {
-      queryBuilder = queryBuilder.ilike("title", `%${query}%`)
+    // Filter berdasarkan query (judul lowongan atau nama perusahaan)
+    if (query && query.trim() !== "") {
+      queryBuilder = queryBuilder.or(`title.ilike.%${query}%,companies.name.ilike.%${query}%`)
     }
 
     // Filter berdasarkan lokasi
     if (location) {
-      queryBuilder = queryBuilder.ilike("location", `%${location}%`)
+      if (Array.isArray(location)) {
+        if (location.length === 1) {
+          queryBuilder = queryBuilder.ilike("location", `%${location[0]}%`)
+        } else if (location.length > 1) {
+          const locationFilters = location.map((loc) => `location.ilike.%${loc}%`)
+          queryBuilder = queryBuilder.or(locationFilters.join(","))
+        }
+      } else {
+        queryBuilder = queryBuilder.ilike("location", `%${location}%`)
+      }
     }
 
     // Filter berdasarkan tipe pekerjaan
     if (jobType) {
-      queryBuilder = queryBuilder.eq("job_type", jobType)
+      if (Array.isArray(jobType)) {
+        if (jobType.length === 1) {
+          queryBuilder = queryBuilder.eq("job_type", jobType[0])
+        } else if (jobType.length > 1) {
+          queryBuilder = queryBuilder.in("job_type", jobType)
+        }
+      } else if (jobType !== "all") {
+        queryBuilder = queryBuilder.eq("job_type", jobType)
+      }
+    }
+
+    // Filter berdasarkan kategori
+    if (categoryId) {
+      if (Array.isArray(categoryId)) {
+        if (categoryId.length === 1) {
+          queryBuilder = queryBuilder.eq("category_id", categoryId[0])
+        } else if (categoryId.length > 1) {
+          queryBuilder = queryBuilder.in("category_id", categoryId)
+        }
+      } else {
+        queryBuilder = queryBuilder.eq("category_id", categoryId)
+      }
+    }
+
+    // Filter berdasarkan gaji
+    if (salaryMin) {
+      // Implementasi filter gaji minimum
+      // Ini adalah pendekatan sederhana, dalam kasus nyata mungkin perlu logika yang lebih kompleks
+      // tergantung pada bagaimana data gaji disimpan
+      queryBuilder = queryBuilder.gte("salary_min", Number.parseInt(salaryMin) * 1000000)
+    }
+
+    if (salaryMax) {
+      // Implementasi filter gaji maksimum
+      queryBuilder = queryBuilder.lte("salary_max", Number.parseInt(salaryMax) * 1000000)
     }
 
     const { data, error } = await queryBuilder
 
     if (error) {
       console.error("Error searching jobs:", error)
-      // Filter mock jobs based on search criteria
-      let filteredJobs = getMockJobs()
-      if (query) {
-        filteredJobs = filteredJobs.filter((job) => job.title.toLowerCase().includes(query.toLowerCase()))
-      }
-      if (location) {
-        filteredJobs = filteredJobs.filter((job) => job.location.toLowerCase().includes(location.toLowerCase()))
-      }
-      if (jobType) {
-        filteredJobs = filteredJobs.filter((job) => job.job_type === jobType)
-      }
-      return filteredJobs
+      return []
+    }
+
+    console.log(`Found ${data?.length || 0} jobs matching criteria`)
+    return data || []
+  } catch (error) {
+    console.error("Unexpected error searching jobs:", error)
+    return []
+  }
+}
+
+// Fungsi untuk mengambil lowongan berdasarkan perusahaan
+export async function getJobsByCompany(companyId: number) {
+  try {
+    const supabase = getSupabaseAdmin()
+
+    const { data, error } = await supabase
+      .from("jobs")
+      .select(`
+        *,
+        company:companies(*),
+        category:job_categories(*)
+      `)
+      .eq("company_id", companyId)
+      .eq("status", "active")
+      .order("posted_at", { ascending: false })
+
+    if (error) {
+      console.error("Error fetching jobs by company:", error)
+      return []
     }
 
     return data || []
   } catch (error) {
-    console.error("Unexpected error searching jobs:", error)
+    console.error("Unexpected error fetching jobs by company:", error)
     return []
   }
 }

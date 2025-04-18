@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation"
 import Image from "next/image"
-import { Calendar, User, Tag } from "lucide-react"
+import { Calendar, User } from "lucide-react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import { getArticleBySlug, getFeaturedArticles } from "@/lib/article-actions"
-import RelatedArticles from "@/components/related-articles"
+import { getArticleBySlug } from "@/lib/article-actions"
 import Markdown from "react-markdown"
 
 export default async function ArticleDetailPage({ params }: { params: { slug: string } }) {
@@ -13,9 +12,6 @@ export default async function ArticleDetailPage({ params }: { params: { slug: st
   if (!article) {
     notFound()
   }
-
-  // Get related articles (featured articles for now)
-  const relatedArticles = await getFeaturedArticles(3)
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -31,13 +27,7 @@ export default async function ArticleDetailPage({ params }: { params: { slug: st
             </div>
             <div className="flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
-              <span>
-                {article.date || new Date(article.created_at || article.published_at).toLocaleDateString("id-ID")}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Tag className="h-4 w-4 mr-1" />
-              <span>{article.category?.name || article.category}</span>
+              <span>{article.date || new Date(article.created_at).toLocaleDateString("id-ID")}</span>
             </div>
           </div>
         </div>
@@ -60,11 +50,6 @@ export default async function ArticleDetailPage({ params }: { params: { slug: st
               <Markdown>{article.content}</Markdown>
             </div>
           </div>
-        </div>
-
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">Artikel Terkait</h2>
-          <RelatedArticles articles={relatedArticles.filter((a) => a.id !== article.id)} />
         </div>
       </div>
 

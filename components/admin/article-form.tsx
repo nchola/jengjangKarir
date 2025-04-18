@@ -1,38 +1,42 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
 import { createArticle, updateArticle } from "@/lib/article-actions"
-import { toast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Article } from "@/types/article"
 import Image from "next/image"
-import { Loader2 } from "lucide-react"
+import { Loader2, X, AlertCircle, CheckCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface ArticleFormProps {
   article?: Article
-  categories?: string[]
 }
 
-export default function ArticleForm({ article, categories = [] }: ArticleFormProps) {
+export default function ArticleForm({ article }: ArticleFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("basic")
-  const [imagePreview, setImagePreview] = useState<string | null>(article?.image || null)
+  const [imagePreview, setImagePreview] = useState<string | null>(article?.image || article?.image_url || null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [resetImage, setResetImage] = useState(false)
+  const [notification, setNotification] = useState<{
+    type: "success" | "error"
+    title: string
+    message: string
+  } | null>(null)
 
   // Form data state
   const [formData, setFormData] = useState({
     title: article?.title || "",
     excerpt: article?.excerpt || "",
     content: article?.content || "",
-    category: article?.category || "",
     author: article?.author || "",
     published: article?.published || false,
     featured: article?.featured || false,
@@ -44,9 +48,8 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Handle checkbox changes
-  const handleCheckboxChange = (name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }))
+  const handleCheckboxChange = (name: string, value: boolean) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   // Handle tab change
@@ -58,6 +61,9 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setImageFile(file)
+      setResetImage(false)
+
       const reader = new FileReader()
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string)
@@ -66,23 +72,46 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
     }
   }
 
+  // Handle image reset
+  const handleImageReset = () => {
+    setImagePreview(null)
+    setImageFile(null)
+    setResetImage(true)
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Validate required fields
     if (!formData.title || !formData.content) {
-      toast({
-        title: "Validasi gagal",
-        description: "Judul dan konten artikel wajib diisi.",
-        variant: "destructive",
+      setNotification({
+        type: "error",
+        title: "Validasi Gagal",
+        message: "Judul dan konten artikel wajib diisi.",
       })
+
+      setTimeout(() => setNotification(null), 5000)
+
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      const formDataObj = new FormData(e.currentTarget)
+      const formDataObj = new FormData()
+
+      // Add all form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataObj.append(key, value)
+      })
+
+      // Add image if selected
+      if (imageFile) {
+        formDataObj.append("image", imageFile)
+      }
+
+      // Add reset image flag
+      formDataObj.append("reset_image", resetImage.toString())
 
       let result
       if (article) {
@@ -92,24 +121,28 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
       }
 
       if (result.success) {
-        toast({
+        setNotification({
+          type: "success",
           title: "Berhasil",
-          description: result.message,
+          message: result.message,
         })
-        router.push("/admin/articles")
+
+        setTimeout(() => {
+          router.push("/admin/articles")
+        }, 2000)
       } else {
-        toast({
+        setNotification({
+          type: "error",
           title: "Gagal",
-          description: result.message,
-          variant: "destructive",
+          message: result.message,
         })
       }
     } catch (error) {
       console.error("Error submitting form:", error)
-      toast({
+      setNotification({
+        type: "error",
         title: "Error",
-        description: "Terjadi kesalahan saat menyimpan data",
-        variant: "destructive",
+        message: "Terjadi kesalahan saat menyimpan data",
       })
     } finally {
       setIsSubmitting(false)
@@ -118,6 +151,25 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
 
   return (
     <form onSubmit={handleSubmit}>
+      {notification && (
+        <Alert
+          className={`mb-6 ${notification.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+          variant="default"
+        >
+          {notification.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          )}
+          <AlertTitle className={notification.type === "success" ? "text-green-800" : "text-red-800"}>
+            {notification.title}
+          </AlertTitle>
+          <AlertDescription className={notification.type === "success" ? "text-green-700" : "text-red-700"}>
+            {notification.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="basic">Informasi Dasar</TabsTrigger>
@@ -151,27 +203,6 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Kategori</Label>
-            <div className="flex gap-2">
-              <Input
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                placeholder="Kategori artikel"
-                list="category-options"
-                className="flex-1"
-              />
-              <datalist id="category-options">
-                {categories.map((category) => (
-                  <option key={category} value={category} />
-                ))}
-              </datalist>
-            </div>
-            <p className="text-sm text-gray-500">Pilih dari kategori yang ada atau ketik kategori baru</p>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="author">Penulis</Label>
             <Input
               id="author"
@@ -184,7 +215,27 @@ export default function ArticleForm({ article, categories = [] }: ArticleFormPro
 
           <div className="space-y-2">
             <Label htmlFor="image">Gambar Artikel</Label>
-            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+            <div className="flex items-center gap-2">
+              <Input
+                id="image"
+                name="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="flex-1"
+              />
+              {imagePreview && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleImageReset}
+                  className="flex-shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
 
             {imagePreview && (
               <div className="mt-2">

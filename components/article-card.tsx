@@ -13,11 +13,9 @@ export interface ArticleCardProps {
   content?: string
   image?: string
   image_url?: string
-  category?: string | any
   author?: string
   date?: string
   created_at?: string
-  published_at?: string
   slug: string
 }
 
@@ -28,30 +26,19 @@ export function ArticleCard({
   content,
   image,
   image_url,
-  category,
   author,
   date,
   created_at,
-  published_at,
   slug,
 }: ArticleCardProps) {
   const [isVisible, setIsVisible] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  // Extract category name if it's an object
-  const categoryName = typeof category === "object" ? category?.name : category
-
   // Use the first paragraph of content as excerpt if no excerpt is provided
   const displayExcerpt = excerpt || (content ? content.split("\n")[0].substring(0, 150) + "..." : "")
 
   // Format date from various sources
-  const displayDate =
-    date ||
-    (published_at
-      ? new Date(published_at).toLocaleDateString("id-ID")
-      : created_at
-        ? new Date(created_at).toLocaleDateString("id-ID")
-        : "")
+  const displayDate = date || (created_at ? new Date(created_at).toLocaleDateString("id-ID") : "")
 
   // Use image or image_url, fallback to placeholder
   const imageSource = image || image_url || "/placeholder.svg?height=208&width=384"
@@ -97,13 +84,6 @@ export function ArticleCard({
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        {categoryName && (
-          <div className="absolute top-4 left-4 z-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-teal-500 text-white">
-              {categoryName}
-            </span>
-          </div>
-        )}
       </div>
 
       <div className="p-5">

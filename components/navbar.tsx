@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import { Menu, X, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,9 +10,10 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
-  const toggleDropdown = (name: string) => {
-    setActiveDropdown(activeDropdown === name ? null : name)
-  }
+  // Gunakan useCallback untuk mencegah re-render yang tidak perlu
+  const toggleDropdown = useCallback((name: string) => {
+    setActiveDropdown((prev) => (prev === name ? null : name))
+  }, [])
 
   const navItems = [
     { name: "Beranda", href: "/" },
@@ -21,9 +22,9 @@ const Navbar = () => {
       href: "/jobs",
       dropdown: [
         { name: "Semua Lowongan", href: "/jobs" },
-        { name: "Lowongan IT", href: "/jobs/it" },
-        { name: "Lowongan Finance", href: "/jobs/finance" },
-        { name: "Lowongan Marketing", href: "/jobs/marketing" },
+        { name: "Lowongan IT", href: "/jobs/category/teknologi-informasi" },
+        { name: "Lowongan Finance", href: "/jobs/category/keuangan" },
+        { name: "Lowongan Marketing", href: "/jobs/category/marketing" },
       ],
     },
     { name: "Perusahaan", href: "/companies" },
@@ -76,6 +77,7 @@ const Navbar = () => {
                             key={dropdownItem.name}
                             href={dropdownItem.href}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setActiveDropdown(null)}
                           >
                             {dropdownItem.name}
                           </Link>
@@ -129,6 +131,7 @@ const Navbar = () => {
                           key={dropdownItem.name}
                           href={dropdownItem.href}
                           className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600"
+                          onClick={() => setActiveDropdown(null)}
                         >
                           {dropdownItem.name}
                         </Link>
@@ -137,7 +140,11 @@ const Navbar = () => {
                   )}
                 </>
               ) : (
-                <Link href={item.href} className="block px-3 py-2 text-gray-700 hover:text-blue-600">
+                <Link
+                  href={item.href}
+                  className="block px-3 py-2 text-gray-700 hover:text-blue-600"
+                  onClick={() => setIsOpen(false)}
+                >
                   {item.name}
                 </Link>
               )}

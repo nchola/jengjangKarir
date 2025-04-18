@@ -2,44 +2,34 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Lock, User, AlertTriangle, Database } from "lucide-react"
-import { useSupabase, useSupabaseConnection } from "@/components/supabase-provider"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Lock, User } from "lucide-react"
+import { loginAdmin } from "@/lib/auth-actions"
 
 export default function AdminLoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const supabase = useSupabase()
-  const { isConnected, error: connectionError } = useSupabaseConnection()
-
-  useEffect(() => {
-    if (connectionError) {
-      toast({
-        title: "Database Connection Error",
-        description: connectionError,
-        variant: "destructive",
-      })
-    }
-  }, [connectionError])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // Simple admin authentication - in a real app, use proper authentication
-      if (email === "admin@example.com" && password === "admin123") {
-        // Set a session cookie to indicate logged in state
-        document.cookie = "adminLoggedIn=true; path=/; max-age=86400" // 24 hours
+      const formData = new FormData()
+      formData.append("email", email)
+      formData.append("password", password)
 
+      const result = await loginAdmin(formData)
+
+      if (result.success) {
         toast({
           title: "Login berhasil",
           description: "Selamat datang di dashboard admin",
@@ -48,7 +38,7 @@ export default function AdminLoginPage() {
       } else {
         toast({
           title: "Login gagal",
-          description: "Email atau password salah",
+          description: result.message,
           variant: "destructive",
         })
       }
@@ -74,19 +64,6 @@ export default function AdminLoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {connectionError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start">
-              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-red-700">Database Connection Error</p>
-                <p className="text-sm text-red-600">{connectionError}</p>
-                <p className="text-xs text-red-500 mt-1">
-                  You can still log in, but some features may not work properly.
-                </p>
-              </div>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -123,24 +100,6 @@ export default function AdminLoginPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2 text-center text-sm text-gray-500">
-          <p className="w-full">
-            Untuk demo, gunakan email: <span className="font-semibold">admin@example.com</span> dan password:{" "}
-            <span className="font-semibold">admin123</span>
-          </p>
-
-          <div className="flex items-center justify-center text-xs pt-2">
-            <Database className="h-3 w-3 mr-1" />
-            <span>
-              Database Status:{" "}
-              {isConnected ? (
-                <span className="text-green-600 font-medium">Connected</span>
-              ) : (
-                <span className="text-red-600 font-medium">Disconnected</span>
-              )}
-            </span>
-          </div>
-        </CardFooter>
       </Card>
     </div>
   )

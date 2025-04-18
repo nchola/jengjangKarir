@@ -5,16 +5,11 @@ import type { Database } from "@/types/supabase"
 type SupabaseClient = ReturnType<typeof createClient<Database>>
 
 // URLs and keys - use environment variables with fallbacks for preview
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://bglmoctyencceighegfn.supabase.co"
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://btwgqfqfxddqrquzyvro.supabase.co"
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbG1vY3R5ZW5jY2VpZ2hlZ2ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MTQ1OTIsImV4cCI6MjA2MDE5MDU5Mn0.DzhCTFrtcWIYnPzHubmP1ArVRn5hhbkzZODGywt0tis"
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-
-// Log connection info
-console.log("Supabase URL:", supabaseUrl)
-console.log("Supabase Anon Key available:", !!supabaseAnonKey)
-console.log("Supabase Service Key available:", !!supabaseServiceKey)
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0d2dxZnFmeGRkcXJxdXp5dnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODYwNzksImV4cCI6MjA2MDM2MjA3OX0.WqLNF4pxVDClkwbLXxXo6z3WE_VXK9fhy-x0FaItQvE"
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0d2dxZnFmeGRkcXJxdXp5dnJvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDc4NjA3OSwiZXhwIjoyMDYwMzYyMDc5fQ.0wpWq3Jlm7u7gcJfawoy4XuXs_f__r4LClrPg9qIqro"
 
 // Create a type for the global window object with our custom property
 declare global {
@@ -34,13 +29,11 @@ export function getSupabaseClient(): SupabaseClient {
   try {
     // For server-side rendering, always create a new client
     if (typeof window === "undefined") {
-      console.log("[SERVER] Creating server-side Supabase client")
       return createClient<Database>(supabaseUrl, supabaseAnonKey)
     }
 
     // For client-side, use the global window object to store the instance
     if (!window.supabaseClient) {
-      console.log("[CLIENT] Creating client-side Supabase client")
       window.supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
         auth: {
           persistSession: true,
@@ -63,7 +56,6 @@ export function getSupabaseClient(): SupabaseClient {
  */
 export function getSupabaseAdmin(): SupabaseClient {
   try {
-    console.log("[SERVER] Creating admin Supabase client")
     // Always create a new admin client for server-side operations
     return createClient<Database>(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
       auth: {

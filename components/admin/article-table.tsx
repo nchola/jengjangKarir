@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { deleteArticle } from "@/lib/article-actions"
 import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/supabase-provider"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { CheckCircle } from "lucide-react"
 import type { Article } from "@/types/article"
 
 export default function ArticleTable() {
@@ -19,6 +21,11 @@ export default function ArticleTable() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [notification, setNotification] = useState<{
+    type: "success" | "error"
+    title: string
+    message: string
+  } | null>(null)
   const supabase = useSupabase()
 
   useEffect(() => {
@@ -31,13 +38,7 @@ export default function ArticleTable() {
     try {
       console.log("Fetching articles...")
 
-      const { data, error } = await supabase
-        .from("articles")
-        .select(`
-          *,
-          category:article_categories(*)
-        `)
-        .order("created_at", { ascending: false })
+      const { data, error } = await supabase.from("articles").select("*").order("created_at", { ascending: false })
 
       if (error) {
         console.error("Error fetching articles:", error)
@@ -86,11 +87,11 @@ export default function ArticleTable() {
 
   const filteredArticles = articles.filter((article) => {
     const title = article.title?.toLowerCase() || ""
-    const categoryName = article.category?.name?.toLowerCase() || article.category?.toLowerCase() || ""
+    const category = typeof article.category === "string" ? article.category.toLowerCase() : ""
     const author = article.author?.toLowerCase() || ""
     const query = searchQuery.toLowerCase()
 
-    return title.includes(query) || categoryName.includes(query) || author.includes(query)
+    return title.includes(query) || category.includes(query) || author.includes(query)
   })
 
   const handleDelete = async (id: number) => {
@@ -99,11 +100,29 @@ export default function ArticleTable() {
         const result = await deleteArticle(id)
         if (result.success) {
           setArticles(articles.filter((article) => article.id !== id))
+
+          // Show success notification
+          setNotification({
+            type: "success",
+            title: "Artikel Berhasil Dihapus",
+            message: "Data artikel telah berhasil dihapus dari sistem.",
+          })
+
+          // Auto-dismiss after 5 seconds
+          setTimeout(() => setNotification(null), 5000)
+
           toast({
             title: "Berhasil",
             description: result.message,
           })
         } else {
+          // Show error notification
+          setNotification({
+            type: "error",
+            title: "Gagal Menghapus Artikel",
+            message: result.message || "Terjadi kesalahan saat menghapus artikel. Silakan coba lagi.",
+          })
+
           toast({
             title: "Gagal",
             description: result.message,
@@ -112,6 +131,14 @@ export default function ArticleTable() {
         }
       } catch (error) {
         console.error("Error deleting article:", error)
+
+        // Show error notification
+        setNotification({
+          type: "error",
+          title: "Error",
+          message: "Terjadi kesalahan saat menghapus artikel",
+        })
+
         toast({
           title: "Error",
           description: "Terjadi kesalahan saat menghapus artikel",
@@ -123,6 +150,25 @@ export default function ArticleTable() {
 
   return (
     <div>
+      {notification && (
+        <Alert
+          className={`mb-4 ${notification.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+          variant="default"
+        >
+          {notification.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          )}
+          <AlertTitle className={notification.type === "success" ? "text-green-800" : "text-red-800"}>
+            {notification.title}
+          </AlertTitle>
+          <AlertDescription className={notification.type === "success" ? "text-green-700" : "text-red-700"}>
+            {notification.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center mb-4">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -185,7 +231,7 @@ export default function ArticleTable() {
                     <TableCell>
                       <div className="relative w-16 h-12 rounded-md overflow-hidden">
                         <Image
-                          src={article.image_url || "/placeholder.svg?height=48&width=64"}
+                          src={article.image_url || article.image || "/placeholder.svg?height=48&width=64"}
                           alt={article.title}
                           fill
                           className="object-cover"
@@ -193,13 +239,13 @@ export default function ArticleTable() {
                       </div>
                     </TableCell>
                     <TableCell className="font-medium max-w-xs truncate">{article.title}</TableCell>
-                    <TableCell>{article.category?.name || article.category || "-"}</TableCell>
+                    <TableCell>{typeof article.category === "string" ? article.category : "-"}</TableCell>
                     <TableCell>{article.author}</TableCell>
                     <TableCell>
                       {new Date(article.published_at || article.created_at).toLocaleDateString("id-ID")}
                     </TableCell>
                     <TableCell>
-                      {article.is_published ? (
+                      {article.is_published || article.published ? (
                         <Badge className="bg-green-100 text-green-800">Dipublikasikan</Badge>
                       ) : (
                         <Badge variant="outline">Draft</Badge>

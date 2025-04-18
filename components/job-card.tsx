@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { MapPin, Clock, Briefcase, BookmarkPlus } from "lucide-react"
+import { MapPin, Clock, Briefcase, BookmarkPlus, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { timeAgo } from "@/lib/utils"
@@ -20,6 +20,7 @@ export function JobCard({
   location,
   job_type,
   salary_display,
+  show_salary,
   posted_at,
   is_featured,
   slug,
@@ -102,10 +103,15 @@ export function JobCard({
               <Clock className="h-3.5 w-3.5 mr-1 text-teal-500" />
               <span>{posted_at ? timeAgo(posted_at) : "Baru"}</span>
             </div>
+            {show_salary && salary_display && (
+              <div className="flex items-center bg-gray-50 px-2 py-1 rounded-full">
+                <DollarSign className="h-3.5 w-3.5 mr-1 text-teal-500" />
+                <span>{salary_display}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="text-teal-600 font-medium">{salary_display}</div>
             <div className="flex gap-2">
               {isNew && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

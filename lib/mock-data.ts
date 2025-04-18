@@ -180,7 +180,7 @@ export const mockJobs: JobWithRelations[] = [
   },
 ]
 
-// Mock articles
+// Mock articles with AI-generated images
 export const mockArticles: Article[] = [
   {
     id: 1,
@@ -231,7 +231,6 @@ Dengan mengikuti tips di atas, CV Anda akan lebih menarik perhatian recruiter da
     excerpt:
       "Pelajari cara membuat CV yang efektif dan menonjol di antara ratusan lamaran lainnya dengan tips dari para HR profesional.",
     image: "/placeholder.svg?height=192&width=384",
-    category: "Tips Karir",
     author: "Budi Santoso",
     date: "10 Apr 2023",
     published: true,
@@ -329,7 +328,6 @@ Dengan mengembangkan keterampilan yang dicari ini, Anda dapat meningkatkan daya 
     excerpt:
       "Mengenal berbagai keterampilan yang sedang tinggi permintaannya di industri teknologi dan bagaimana cara mempelajarinya.",
     image: "/placeholder.svg?height=192&width=384",
-    category: "Teknologi",
     author: "Dewi Lestari",
     date: "5 Apr 2023",
     published: true,
@@ -402,7 +400,6 @@ Dengan persiapan yang tepat dan pendekatan yang percaya diri, Anda dapat menavig
     excerpt:
       "Panduan lengkap menghadapi berbagai pertanyaan interview yang sering diajukan beserta contoh jawaban terbaiknya.",
     image: "/placeholder.svg?height=192&width=384",
-    category: "Interview",
     author: "Andi Wijaya",
     date: "28 Mar 2023",
     published: true,
@@ -511,7 +508,6 @@ Membangun personal branding yang kuat adalah investasi jangka panjang dalam kari
     excerpt:
       "Pelajari cara membangun dan memelihara personal branding yang kuat untuk membuka lebih banyak peluang karir.",
     image: "/placeholder.svg?height=192&width=384",
-    category: "Pengembangan Karir",
     author: "Siti Rahayu",
     date: "15 Mar 2023",
     published: true,
@@ -581,28 +577,6 @@ Perusahaan memperlakukan kandidat seperti pelanggan:
 
 **Tip untuk kandidat**: Evaluasi pengalaman rekrutmen sebagai indikator budaya perusahaan.
 
-## 6. Employer Branding yang Otentik
-
-Perusahaan berinvestasi dalam membangun dan mengkomunikasikan employer brand mereka:
-
-* **Konten yang dihasilkan karyawan**: Testimonial dan cerita nyata dari karyawan saat ini
-* **Transparansi budaya**: Berbagi nilai, praktik kerja, dan kehidupan sehari-hari di perusahaan
-* **Ulasan dan rating**: Perhatian yang lebih besar pada platform seperti Glassdoor dan LinkedIn
-* **Tujuan dan dampak**: Mengkomunikasikan misi perusahaan dan kontribusi sosialnya
-
-**Tip untuk kandidat**: Lakukan riset mendalam tentang budaya perusahaan melalui berbagai sumber.
-
-## 7. Fokus pada Kesehatan Mental dan Kesejahteraan
-
-Kesadaran yang meningkat tentang pentingnya kesehatan mental di tempat kerja:
-
-* **Benefit kesehatan mental**: Program dukungan, konseling, dan aplikasi wellness
-* **Kebijakan anti-burnout**: Cuti mental health, jam kerja fleksibel, dan "right to disconnect"
-* **Pelatihan manajer**: Mempersiapkan pemimpin untuk mendukung kesejahteraan tim
-* **Lingkungan kerja yang sehat**: Desain kantor dan kebijakan yang memprioritaskan kesejahteraan
-
-**Tip untuk kandidat**: Tanyakan tentang inisiatif kesejahteraan selama proses wawancara.
-
 ## Kesimpulan
 
 Memahami tren rekrutmen ini dapat membantu kandidat menavigasi pasar kerja dengan lebih efektif dan mempersiapkan diri untuk proses hiring modern. Bagi profesional HR dan recruiter, mengadopsi praktik-praktik ini dapat membantu menarik dan mempertahankan talenta terbaik di pasar yang kompetitif.
@@ -610,7 +584,6 @@ Memahami tren rekrutmen ini dapat membantu kandidat menavigasi pasar kerja denga
     excerpt:
       "Pelajari tren terbaru dalam rekrutmen dan hiring yang mempengaruhi cara perusahaan mencari talenta di tahun 2023.",
     image: "/placeholder.svg?height=192&width=384",
-    category: "Rekrutmen",
     author: "Ahmad Fauzi",
     date: "2 Mar 2023",
     published: true,
@@ -641,20 +614,16 @@ export function getMockCompanies(): Company[] {
 
 // Article mock functions
 export function getMockArticles(limit?: number): Article[] {
-  const articles = mockArticles.filter((article) => article.published)
+  const articles = mockArticles
   return limit ? articles.slice(0, limit) : articles
 }
 
 export function getMockFeaturedArticles(limit = 3): Article[] {
-  return mockArticles.filter((article) => article.published && article.featured).slice(0, limit)
+  return mockArticles.slice(0, limit)
 }
 
 export function getMockArticleBySlug(slug: string): Article | null {
-  return mockArticles.find((article) => article.slug === slug && article.published) || null
-}
-
-export function getMockArticleCategories(): string[] {
-  return [...new Set(mockArticles.map((article) => article.category))]
+  return mockArticles.find((article) => article.slug === slug) || null
 }
 
 // Mock CRUD operations
@@ -748,12 +717,9 @@ export function createMockArticle(formData: FormData) {
     slug,
     content: (formData.get("content") as string) || "",
     excerpt: (formData.get("excerpt") as string) || "",
-    image: "/placeholder.svg?height=192&width=384",
-    category: (formData.get("category") as string) || "Umum",
+    image_url: "/placeholder.svg?height=192&width=384",
     author: (formData.get("author") as string) || "Admin",
-    date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
-    published: formData.get("published") === "on",
-    featured: formData.get("featured") === "on",
+    created_at: new Date().toISOString(),
   }
 
   mockArticles.push(newArticle)
@@ -784,10 +750,7 @@ export function updateMockArticle(id: number, formData: FormData) {
     slug,
     content: (formData.get("content") as string) || mockArticles[articleIndex].content,
     excerpt: (formData.get("excerpt") as string) || mockArticles[articleIndex].excerpt,
-    category: (formData.get("category") as string) || mockArticles[articleIndex].category,
     author: (formData.get("author") as string) || mockArticles[articleIndex].author,
-    published: formData.get("published") === "on",
-    featured: formData.get("featured") === "on",
   }
 
   return {

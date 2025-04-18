@@ -26,7 +26,8 @@ export default async function Home() {
       <Hero />
 
       <div className="container mx-auto px-4 py-8">
-        <SearchBar />
+        {/* Pada halaman utama, kita tentukan targetPath ke /jobs */}
+        <SearchBar targetPath="/jobs" />
 
         <section className="my-12">
           <h2 className="text-3xl font-bold mb-6">

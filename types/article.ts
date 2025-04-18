@@ -6,19 +6,7 @@ export interface Article {
   excerpt?: string
   image?: string
   image_url?: string
-  category?:
-    | string
-    | {
-        id: number
-        name: string
-        slug: string
-      }
   author?: string
   date?: string
   created_at?: string
-  published_at?: string
-  is_published?: boolean
-  published?: boolean
-  is_featured?: boolean
-  featured?: boolean
 }

@@ -12,6 +12,8 @@ import { deleteJob } from "@/lib/actions"
 import { toast } from "@/components/ui/use-toast"
 import { formatDate } from "@/lib/utils"
 import { useSupabase } from "@/components/supabase-provider"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { CheckCircle } from "lucide-react"
 import type { JobWithRelations } from "@/types/job"
 
 export default function JobListingTable() {
@@ -19,6 +21,11 @@ export default function JobListingTable() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [notification, setNotification] = useState<{
+    type: "success" | "error"
+    title: string
+    message: string
+  } | null>(null)
   const supabase = useSupabase()
 
   useEffect(() => {
@@ -77,11 +84,29 @@ export default function JobListingTable() {
         const result = await deleteJob(id)
         if (result.success) {
           setJobs(jobs.filter((job) => job.id !== id))
+
+          // Show success notification
+          setNotification({
+            type: "success",
+            title: "Lowongan Berhasil Dihapus",
+            message: "Data lowongan telah berhasil dihapus dari sistem.",
+          })
+
+          // Auto-dismiss after 5 seconds
+          setTimeout(() => setNotification(null), 5000)
+
           toast({
             title: "Berhasil",
             description: result.message,
           })
         } else {
+          // Show error notification
+          setNotification({
+            type: "error",
+            title: "Gagal Menghapus Lowongan",
+            message: result.message || "Terjadi kesalahan saat menghapus lowongan. Silakan coba lagi.",
+          })
+
           toast({
             title: "Gagal",
             description: result.message,
@@ -90,6 +115,14 @@ export default function JobListingTable() {
         }
       } catch (error) {
         console.error("Error deleting job:", error)
+
+        // Show error notification
+        setNotification({
+          type: "error",
+          title: "Error",
+          message: "Terjadi kesalahan saat menghapus lowongan",
+        })
+
         toast({
           title: "Error",
           description: "Terjadi kesalahan saat menghapus lowongan",
@@ -112,6 +145,25 @@ export default function JobListingTable() {
 
   return (
     <div>
+      {notification && (
+        <Alert
+          className={`mb-4 ${notification.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+          variant="default"
+        >
+          {notification.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          )}
+          <AlertTitle className={notification.type === "success" ? "text-green-800" : "text-red-800"}>
+            {notification.title}
+          </AlertTitle>
+          <AlertDescription className={notification.type === "success" ? "text-green-700" : "text-red-700"}>
+            {notification.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center mb-4">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -193,7 +245,7 @@ export default function JobListingTable() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link href={`/jobs/${job.slug}`}>
+                            <Link href={`/jobs/${job.slug}`} target="_blank">
                               <Eye className="h-4 w-4 mr-2" />
                               Lihat
                             </Link>

@@ -1,25 +1,38 @@
-import AdminNavbar from "@/components/admin/admin-navbar"
-import AdminSidebar from "@/components/admin/admin-sidebar"
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Briefcase, Building, Tag } from "lucide-react"
 import { getJobs, getCategories, getCompanies } from "@/lib/actions"
 import AuthCheck from "@/components/admin/auth-check"
+import { useEffect, useState } from "react"
 
-export default async function AdminDashboardPage() {
-  // Try to fetch data, but handle errors gracefully
-  let jobs = []
-  let categories = []
-  let companies = []
+export default function AdminDashboardPage() {
+  const [jobs, setJobs] = useState([])
+  const [categories, setCategories] = useState([])
+  const [companies, setCompanies] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  try {
-    ;[jobs, categories, companies] = await Promise.all([
-      getJobs().catch(() => []),
-      getCategories().catch(() => []),
-      getCompanies().catch(() => []),
-    ])
-  } catch (error) {
-    console.error("Error fetching dashboard data:", error)
-  }
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [jobsData, categoriesData, companiesData] = await Promise.all([
+          getJobs().catch(() => []),
+          getCategories().catch(() => []),
+          getCompanies().catch(() => []),
+        ])
+
+        setJobs(jobsData)
+        setCategories(categoriesData)
+        setCompanies(companiesData)
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const activeJobs = jobs.filter((job) => job.status === "active").length
   const featuredJobs = jobs.filter((job) => job.is_featured).length
@@ -27,102 +40,102 @@ export default async function AdminDashboardPage() {
   return (
     <AuthCheck>
       <div className="min-h-screen bg-gray-50">
-        <AdminNavbar />
-
         <div className="flex">
-          <AdminSidebar />
-
-          <main className="flex-1 p-6">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="text-gray-600">Selamat datang di dashboard admin JenjangKarir</p>
+          <main className="flex-1 p-6 admin-mobile-container md:p-6">
+            <div className="mb-6 flex justify-between items-center admin-mobile-spacing">
+              <div>
+                <h1 className="text-2xl font-bold admin-mobile-heading md:text-2xl">Dashboard</h1>
+                <p className="text-gray-600 admin-mobile-text md:text-base">
+                  Selamat datang di dashboard admin JenjangKarir
+                </p>
+              </div>
             </div>
 
-           
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Total Lowongan</CardTitle>
-                  <Briefcase className="h-4 w-4 text-teal-500" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 admin-mobile-spacing">
+              <Card className="admin-mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 admin-mobile-container">
+                  <CardTitle className="text-sm font-medium admin-mobile-text md:text-sm">Total Lowongan</CardTitle>
+                  <Briefcase className="h-4 w-4 text-teal-500 admin-mobile-icon md:h-4 md:w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{jobs.length}</div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <div className="text-2xl font-bold admin-mobile-heading md:text-2xl">{jobs.length}</div>
+                  <p className="text-xs text-gray-500 mt-1 admin-mobile-text md:text-xs">
                     {activeJobs} aktif, {jobs.length - activeJobs} kedaluwarsa
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Lowongan Unggulan</CardTitle>
-                  <Briefcase className="h-4 w-4 text-teal-500" />
+              <Card className="admin-mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 admin-mobile-container">
+                  <CardTitle className="text-sm font-medium admin-mobile-text md:text-sm">Lowongan Unggulan</CardTitle>
+                  <Briefcase className="h-4 w-4 text-teal-500 admin-mobile-icon md:h-4 md:w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{featuredJobs}</div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <div className="text-2xl font-bold admin-mobile-heading md:text-2xl">{featuredJobs}</div>
+                  <p className="text-xs text-gray-500 mt-1 admin-mobile-text md:text-xs">
                     {jobs.length > 0 ? ((featuredJobs / jobs.length) * 100).toFixed(1) : 0}% dari total
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Perusahaan</CardTitle>
-                  <Building className="h-4 w-4 text-teal-500" />
+              <Card className="admin-mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 admin-mobile-container">
+                  <CardTitle className="text-sm font-medium admin-mobile-text md:text-sm">Perusahaan</CardTitle>
+                  <Building className="h-4 w-4 text-teal-500 admin-mobile-icon md:h-4 md:w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{companies.length}</div>
-                  <p className="text-xs text-gray-500 mt-1">Terdaftar di platform</p>
+                  <div className="text-2xl font-bold admin-mobile-heading md:text-2xl">{companies.length}</div>
+                  <p className="text-xs text-gray-500 mt-1 admin-mobile-text md:text-xs">Terdaftar di platform</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Kategori</CardTitle>
-                  <Tag className="h-4 w-4 text-teal-500" />
+              <Card className="admin-mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 admin-mobile-container">
+                  <CardTitle className="text-sm font-medium admin-mobile-text md:text-sm">Kategori</CardTitle>
+                  <Tag className="h-4 w-4 text-teal-500 admin-mobile-icon md:h-4 md:w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{categories.length}</div>
-                  <p className="text-xs text-gray-500 mt-1">Kategori lowongan</p>
+                  <div className="text-2xl font-bold admin-mobile-heading md:text-2xl">{categories.length}</div>
+                  <p className="text-xs text-gray-500 mt-1 admin-mobile-text md:text-xs">Kategori lowongan</p>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Lowongan Terbaru</CardTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 admin-mobile-spacing">
+              <Card className="admin-mobile-card">
+                <CardHeader className="admin-mobile-container">
+                  <CardTitle className="admin-mobile-subheading md:text-base">Lowongan Terbaru</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {jobs.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 admin-mobile-spacing">
                       {jobs.slice(0, 5).map((job) => (
                         <div key={job.id} className="flex items-center justify-between border-b pb-2 last:border-0">
                           <div>
-                            <p className="font-medium">{job.title}</p>
-                            <p className="text-sm text-gray-500">{job.company?.name || "Unknown Company"}</p>
+                            <p className="font-medium admin-mobile-text md:text-base">{job.title}</p>
+                            <p className="text-sm text-gray-500 admin-mobile-text md:text-sm">
+                              {job.company?.name || "Unknown Company"}
+                            </p>
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 admin-mobile-text md:text-sm">
                             {new Date(job.posted_at).toLocaleDateString("id-ID")}
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-center py-4">No jobs found</p>
+                    <p className="text-gray-500 text-center py-4 admin-mobile-text md:text-base">No jobs found</p>
                   )}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kategori Populer</CardTitle>
+              <Card className="admin-mobile-card">
+                <CardHeader className="admin-mobile-container">
+                  <CardTitle className="admin-mobile-subheading md:text-base">Kategori Populer</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {categories.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 admin-mobile-spacing">
                       {categories
                         .sort((a, b) => b.job_count - a.job_count)
                         .slice(0, 5)
@@ -132,15 +145,17 @@ export default async function AdminDashboardPage() {
                             className="flex items-center justify-between border-b pb-2 last:border-0"
                           >
                             <div className="flex items-center">
-                              <span className="text-xl mr-2">{category.icon || "🔍"}</span>
-                              <p className="font-medium">{category.name}</p>
+                              <span className="text-xl mr-2 admin-mobile-text md:text-xl">{category.icon || "🔍"}</span>
+                              <p className="font-medium admin-mobile-text md:text-base">{category.name}</p>
                             </div>
-                            <div className="text-sm text-gray-500">{category.job_count} lowongan</div>
+                            <div className="text-sm text-gray-500 admin-mobile-text md:text-sm">
+                              {category.job_count} lowongan
+                            </div>
                           </div>
                         ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-center py-4">No categories found</p>
+                    <p className="text-gray-500 text-center py-4 admin-mobile-text md:text-base">No categories found</p>
                   )}
                 </CardContent>
               </Card>

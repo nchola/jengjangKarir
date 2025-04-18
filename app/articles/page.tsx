@@ -2,12 +2,11 @@ import { Suspense } from "react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getArticles, getArticleCategories } from "@/lib/article-actions"
+import { getArticles } from "@/lib/article-actions"
 import ArticleList from "@/components/article-list"
-import ArticleFilters from "@/components/article-filters"
 
 export default async function ArticlesPage() {
-  const [articles, categories] = await Promise.all([getArticles(), getArticleCategories()])
+  const articles = await getArticles()
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -23,27 +22,17 @@ export default async function ArticlesPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-1/4">
-            <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
-              <ArticleFilters categories={categories} />
-            </Suspense>
-          </div>
-
-          <div className="w-full md:w-3/4">
-            <Suspense
-              fallback={
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Skeleton key={i} className="h-64 w-full" />
-                  ))}
-                </div>
-              }
-            >
-              <ArticleList articles={articles} />
-            </Suspense>
-          </div>
-        </div>
+        <Suspense
+          fallback={
+            <div className="space-y-4">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-64 w-full" />
+              ))}
+            </div>
+          }
+        >
+          <ArticleList articles={articles} />
+        </Suspense>
       </div>
 
       <Footer />

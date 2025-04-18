@@ -10,12 +10,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/components/supabase-provider"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle, CheckCircle } from "lucide-react"
 import type { Company } from "@/types/job"
+import { deleteCompany } from "@/lib/company-actions" // Fixed import path
 
 export default function CompanyTable() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [notification, setNotification] = useState<{
+    type: "success" | "error"
+    title: string
+    message: string
+  } | null>(null)
   const supabase = useSupabase()
 
   useEffect(() => {
@@ -52,19 +60,55 @@ export default function CompanyTable() {
   )
 
   const handleDelete = async (id: number) => {
-    if (confirm("Apakah Anda yakin ingin menghapus perusahaan ini?")) {
+    if (
+      confirm(
+        "Apakah Anda yakin ingin menghapus perusahaan ini? Jika perusahaan memiliki lowongan terkait, penghapusan akan gagal.",
+      )
+    ) {
       try {
-        const { error } = await supabase.from("companies").delete().eq("id", id)
+        const result = await deleteCompany(id)
 
-        if (error) throw error
+        if (result.success) {
+          setCompanies(companies.filter((company) => company.id !== id))
 
-        setCompanies(companies.filter((company) => company.id !== id))
-        toast({
-          title: "Berhasil",
-          description: "Perusahaan berhasil dihapus",
-        })
+          // Show success notification
+          setNotification({
+            type: "success",
+            title: "Perusahaan Berhasil Dihapus",
+            message: result.message,
+          })
+
+          // Auto-dismiss after 5 seconds
+          setTimeout(() => setNotification(null), 5000)
+
+          toast({
+            title: "Berhasil",
+            description: result.message,
+          })
+        } else {
+          // Show error notification
+          setNotification({
+            type: "error",
+            title: "Gagal Menghapus Perusahaan",
+            message: result.message,
+          })
+
+          toast({
+            title: "Gagal",
+            description: result.message,
+            variant: "destructive",
+          })
+        }
       } catch (error) {
         console.error("Error deleting company:", error)
+
+        // Show error notification
+        setNotification({
+          type: "error",
+          title: "Gagal Menghapus Perusahaan",
+          message: "Terjadi kesalahan saat menghapus perusahaan. Silakan coba lagi.",
+        })
+
         toast({
           title: "Error",
           description: "Terjadi kesalahan saat menghapus perusahaan",
@@ -76,6 +120,25 @@ export default function CompanyTable() {
 
   return (
     <div>
+      {notification && (
+        <Alert
+          className={`mb-4 ${notification.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+          variant="default"
+        >
+          {notification.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          )}
+          <AlertTitle className={notification.type === "success" ? "text-green-800" : "text-red-800"}>
+            {notification.title}
+          </AlertTitle>
+          <AlertDescription className={notification.type === "success" ? "text-green-700" : "text-red-700"}>
+            {notification.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center mb-4">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />

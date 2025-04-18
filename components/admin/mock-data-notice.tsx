@@ -10,7 +10,10 @@ export default function MockDataNotice() {
   const { isConnected } = useSupabaseConnection()
   const [dismissed, setDismissed] = useState(false)
 
-  if (isConnected || dismissed) {
+  // Only show on diagnostics page
+  const isDiagnosticsPage = typeof window !== "undefined" && window.location.pathname.includes("/admin/diagnostics")
+
+  if (isConnected || dismissed || !isDiagnosticsPage) {
     return null
   }
 

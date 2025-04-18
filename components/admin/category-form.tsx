@@ -1,15 +1,15 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { createCategory } from "@/lib/actions"
+import { createCategory, updateCategory } from "@/lib/actions"
 import { toast } from "@/components/ui/use-toast"
 import type { JobCategory } from "@/types/job"
+import { Loader2 } from "lucide-react"
 
 interface CategoryFormProps {
   category?: JobCategory
@@ -66,12 +66,13 @@ export default function CategoryForm({ category }: CategoryFormProps) {
     setIsSubmitting(true)
 
     try {
-      const formDataObj = new FormData(e.currentTarget)
-      formDataObj.set("icon", selectedIcon)
+      const formDataObj = new FormData()
+      formDataObj.append("name", formData.name)
+      formDataObj.append("icon", selectedIcon)
 
       let result
       if (category) {
-        // Implementasi update category jika diperlukan
+        result = await updateCategory(category.id, formDataObj)
       } else {
         result = await createCategory(formDataObj)
       }
@@ -142,7 +143,16 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           Batal
         </Button>
         <Button type="submit" disabled={isSubmitting} className="bg-teal-500 hover:bg-teal-600">
-          {isSubmitting ? "Menyimpan..." : category ? "Update Kategori" : "Simpan Kategori"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {category ? "Menyimpan..." : "Membuat..."}
+            </>
+          ) : category ? (
+            "Update Kategori"
+          ) : (
+            "Simpan Kategori"
+          )}
         </Button>
       </div>
     </form>

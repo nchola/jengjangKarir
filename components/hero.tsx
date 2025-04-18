@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import Link from "next/link"
 
 const Hero = () => {
   return (
@@ -28,9 +29,11 @@ const Hero = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-white border-0 h-14 px-8 text-lg">
-                Cari Lowongan
-              </Button>
+              <Link href="/jobs">
+                <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-white border-0 h-14 px-8 text-lg">
+                  Cari Lowongan
+                </Button>
+              </Link>
               <Button
                 size="lg"
                 variant="outline"
@@ -62,7 +65,7 @@ const Hero = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-purple-500/20 rounded-2xl blur-xl"></div>
             <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 shadow-2xl">
               <Image
-                src="/bg-hero.jpeg?height=400&width=500"
+                src="/placeholder.svg?height=400&width=500"
                 alt="Career illustration"
                 width={500}
                 height={400}

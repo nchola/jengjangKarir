@@ -1,0 +1,41 @@
+"use server"
+
+import { revalidatePath } from "next/cache"
+import { getSupabaseAdmin } from "../supabase"
+
+export async function deleteCategory(id: number) {
+  try {
+    const supabase = getSupabaseAdmin()
+
+    // Check if category has jobs
+    const { count, error: countError } = await supabase
+      .from("jobs")
+      .select("*", { count: "exact", head: true })
+      .eq("category_id", id)
+
+    if (countError) {
+      console.error("Error checking category jobs:", countError)
+      return { success: false, message: `Gagal memeriksa lowongan kategori: ${countError.message}` }
+    }
+
+    if (count && count > 0) {
+      return {
+        success: false,
+        message: `Kategori ini memiliki ${count} lowongan aktif. Hapus lowongan terlebih dahulu atau ubah kategori lowongan sebelum menghapus kategori.`,
+      }
+    }
+
+    const { error } = await supabase.from("job_categories").delete().eq("id", id)
+
+    if (error) {
+      console.error("Error deleting category:", error)
+      return { success: false, message: `Gagal menghapus kategori: ${error.message}` }
+    }
+
+    revalidatePath("/admin/categories")
+    return { success: true, message: "Kategori berhasil dihapus" }
+  } catch (error: any) {
+    console.error("Unexpected error deleting category:", error)
+    return { success: false, message: `Terjadi kesalahan: ${error.message}` }
+  }
+}

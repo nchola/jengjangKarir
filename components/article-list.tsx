@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArticleCard } from "@/components/article-card"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
@@ -11,9 +11,15 @@ interface ArticleListProps {
   initialLimit?: number
 }
 
-const ArticleList = ({ articles, initialLimit = 6 }: ArticleListProps) => {
+const ArticleList = ({ articles: initialArticles, initialLimit = 6 }: ArticleListProps) => {
+  const [articles, setArticles] = useState<Article[]>(initialArticles)
   const [limit, setLimit] = useState(initialLimit)
   const [loading, setLoading] = useState(false)
+
+  // Ensure articles are properly displayed even if they come from server
+  useEffect(() => {
+    setArticles(initialArticles)
+  }, [initialArticles])
 
   const loadMore = () => {
     setLoading(true)

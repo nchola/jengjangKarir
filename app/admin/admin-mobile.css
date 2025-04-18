@@ -1,0 +1,72 @@
+/* Mobile styles for admin dashboard */
+@media (max-width: 768px) {
+  /* Text sizing */
+  .admin-mobile-text {
+    font-size: 0.7rem !important; /* 30% smaller */
+  }
+
+  .admin-mobile-heading {
+    font-size: 1.12rem !important; /* 30% smaller than 1.6rem */
+  }
+
+  .admin-mobile-subheading {
+    font-size: 0.84rem !important; /* 30% smaller than 1.2rem */
+  }
+
+  /* Container padding */
+  .admin-mobile-container {
+    padding: 0.7rem !important; /* 30% smaller padding */
+  }
+
+  /* Spacing */
+  .admin-mobile-spacing {
+    margin-bottom: 0.7rem !important;
+    gap: 0.7rem !important;
+  }
+
+  /* Card */
+  .admin-mobile-card {
+    padding: 0.7rem !important;
+    border-radius: 0.35rem !important;
+  }
+
+  /* Buttons */
+  .admin-mobile-button {
+    padding: 0.35rem 0.7rem !important;
+    font-size: 0.7rem !important;
+    height: auto !important;
+    min-height: 1.75rem !important;
+  }
+
+  /* Icons */
+  .admin-mobile-icon {
+    width: 0.7em !important;
+    height: 0.7em !important;
+  }
+
+  /* Inputs */
+  .admin-mobile-input {
+    height: 2.1rem !important;
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.7rem !important;
+  }
+
+  /* Tables */
+  .admin-mobile-table th,
+  .admin-mobile-table td {
+    padding: 0.35rem 0.7rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Form elements */
+  .admin-mobile-form label {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.175rem !important;
+  }
+
+  /* Sidebar width */
+  .admin-mobile-sidebar {
+    width: 70% !important;
+    max-width: 200px !important;
+  }
+}
