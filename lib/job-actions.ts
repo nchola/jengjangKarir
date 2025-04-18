@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { getSupabaseAdmin } from "./supabase"
 import { slugify } from "./utils"
+import { JobCategory } from '@/lib/types'
 
 // Fungsi untuk mengambil semua lowongan
 export async function getJobs() {
@@ -426,4 +427,18 @@ export async function getCategoryBySlug(slug: string) {
     console.error("[Server Action] Error getting category:", error)
     return null
   }
+}
+
+export async function getCategories(): Promise<JobCategory[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('job_categories')
+    .select('id, name, slug, icon, job_count, created_at')
+    .order('name')
+
+  if (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
+
+  return data || []
 }

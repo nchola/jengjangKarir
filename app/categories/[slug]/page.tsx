@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { notFound } from "next/navigation"
-import { getJobsByCategory, getCategoryBySlug } from "@/lib/job-actions"
-import JobCard from "@/components/job-card"
+import { Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import { FilterProvider } from "@/components/filter-provider"
+import { Skeleton } from "@/components/ui/skeleton"
+import JobList from "@/components/job-list"
+import FilterPanel from "@/components/filter-panel"
+import { getCategoryBySlug, getJobsByCategory, getCategories } from "@/lib/job-actions"
+import { JobCategory } from "@/lib/types"
 import JobFilters from "@/components/job-filters"
-import { getCategories } from "@/lib/actions"
 
 interface CategoryPageProps {
   params: {
@@ -18,33 +18,30 @@ interface CategoryPageProps {
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  const [category, setCategory] = useState<any>(null)
+  const [category, setCategory] = useState<JobCategory | null>(null)
   const [jobs, setJobs] = useState<any[]>([])
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<JobCategory[]>([])
   const [loading, setLoading] = useState(true)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   useEffect(() => {
     async function loadData() {
       try {
-        // Load category and categories data first
-        const [categoryData, categoriesData] = await Promise.all([
+        const [categoryData, jobsData, categoriesData] = await Promise.all([
           getCategoryBySlug(params.slug),
-          getCategories()
+          getJobsByCategory(params.slug),
+          getCategories(),
         ])
 
         if (!categoryData) {
           notFound()
-          return
         }
 
         setCategory(categoryData)
-        setCategories(categoriesData)
-
-        // Then load jobs for the category using slug instead of ID
-        const jobsData = await getJobsByCategory(params.slug)
         setJobs(jobsData)
+        setCategories(categoriesData)
       } catch (error) {
-        console.error("Error loading category data:", error)
+        console.error("Error loading data:", error)
       } finally {
         setLoading(false)
       }
@@ -55,78 +52,50 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/6 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-6 h-48"></div>
-              ))}
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <div className="grid gap-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
         </div>
       </div>
     )
   }
 
   if (!category) {
-    notFound()
+    return null
   }
 
   return (
-    <FilterProvider filterType="job">
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="mb-6">
-            <Button variant="ghost" size="sm" asChild className="mb-4">
-              <Link href="/">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Kembali ke Beranda
-              </Link>
-            </Button>
-            
-            <h1 className="text-2xl font-bold mb-2">Lowongan {category.name}</h1>
-            <p className="text-gray-600">
-              {jobs.length} lowongan tersedia
-            </p>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Lowongan {category.name}</h1>
+        <Button
+          variant="outline"
+          className="md:hidden"
+          onClick={() => setIsFilterOpen(true)}
+        >
+          <Filter className="h-4 w-4 mr-2" />
+          Filter
+        </Button>
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Filter sidebar */}
-            <div className="lg:col-span-1">
-              <JobFilters categories={categories} />
-            </div>
-
-            {/* Job listings */}
-            <div className="lg:col-span-3">
-              {jobs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {jobs.map((job) => (
-                    <JobCard
-                      key={job.id}
-                      {...job}
-                      isNew={
-                        new Date(job.posted_at).getTime() >
-                        new Date().getTime() - 7 * 24 * 60 * 60 * 1000
-                      }
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">Belum ada lowongan untuk kategori ini</p>
-                  <Button asChild className="mt-4">
-                    <Link href="/">Lihat Semua Lowongan</Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="hidden md:block">
+          <JobFilters categories={categories} />
+        </div>
+        <div className="md:col-span-3">
+          <JobList initialJobs={jobs} />
         </div>
       </div>
-    </FilterProvider>
+
+      <FilterPanel
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        categories={categories}
+      />
+    </div>
   )
 } 
  

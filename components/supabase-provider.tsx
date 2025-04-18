@@ -8,8 +8,8 @@ import type { Database } from "@/types/supabase"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
 // URLs and keys - use environment variables with fallbacks for preview
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://btwgqfqfxddqrquzyvro.supabase.co"
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0d2dxZnFmeGRkcXJxdXp5dnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODYwNzksImV4cCI6MjA2MDM2MjA3OX0.WqLNF4pxVDClkwbLXxXo6z3WE_VXK9fhy-x0FaItQvE"
 
 // Create a context for the Supabase client
 type SupabaseContext = {
@@ -43,7 +43,7 @@ const createSupabaseClient = () => {
   } catch (error) {
     console.error("Error creating Supabase client:", error)
     // Return a minimal client that won't crash the app
-    return createClient<Database>("https://example.supabase.co", "dummy-key", {
+    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false },
     })
   }
