@@ -95,7 +95,7 @@ export default async function JobDetailPage({ params }: { params: { slug: string
             <div className="mb-6 bg-gray-50 p-4 rounded-lg">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
                 <Info className="h-5 w-5 mr-2 text-teal-500" />
-                Tentang {job.company.name}
+                Tentang Perusahaan
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

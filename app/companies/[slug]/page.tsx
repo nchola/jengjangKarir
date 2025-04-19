@@ -87,7 +87,7 @@ export default async function CompanyDetailPage({ params }: { params: { slug: st
 
               {company.background && (
                 <div className="mb-6">
-                  <h3 className="font-semibold mb-2">Tentang {company.name}</h3>
+                  <h3 className="font-semibold mb-2">Tentang Perusahaan</h3>
                   <p className="text-gray-700">{company.background}</p>
                 </div>
               )}
@@ -110,7 +110,7 @@ export default async function CompanyDetailPage({ params }: { params: { slug: st
         </div>
 
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Lowongan di {company.name}</h2>
+          <h2 className="text-2xl font-semibold mb-4">Lowongan Terkait</h2>
           <Suspense
             fallback={
               <div className="space-y-4">
