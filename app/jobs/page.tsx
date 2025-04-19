@@ -7,7 +7,7 @@ import JobFilters from "@/components/job-filters"
 import JobList from "@/components/job-list"
 import { FilterChips } from "@/components/filter-chips"
 import { FilterProvider } from "@/components/filter-provider"
-import { getJobs, getCategories, searchJobs } from "@/lib/actions"
+import { getCategories, searchJobs } from "@/lib/actions"
 
 export default async function JobsPage({
   searchParams,
@@ -16,17 +16,23 @@ export default async function JobsPage({
 }) {
   // Extract search parameters
   const query = typeof searchParams.q === "string" ? searchParams.q : undefined
-  const location = searchParams.location
-  const jobType = searchParams.job_type
-  const categoryId = searchParams.category
+  const location = typeof searchParams.location === "string" ? searchParams.location : undefined
+  const jobType = typeof searchParams.job_type === "string" ? searchParams.job_type : undefined
+  const categoryId = typeof searchParams.category === "string" ? searchParams.category : undefined
   const salaryMin = typeof searchParams.salary_min === "string" ? searchParams.salary_min : undefined
   const salaryMax = typeof searchParams.salary_max === "string" ? searchParams.salary_max : undefined
 
-  // Get jobs based on search parameters if they exist
-  const [jobs, categories] = await Promise.all([
-    query || location || jobType || categoryId || salaryMin || salaryMax
-      ? searchJobs(query || "", location, jobType, categoryId, salaryMin, salaryMax)
-      : getJobs(),
+  // Get jobs and categories
+  const [jobsResult, categories] = await Promise.all([
+    searchJobs({
+      query,
+      location,
+      jobType,
+      categoryId,
+      salaryMin,
+      salaryMax,
+      limit: 10,
+    }),
     getCategories(),
   ])
 
@@ -45,14 +51,14 @@ export default async function JobsPage({
         <div className="container mx-auto px-4 py-8">
           <FilterChips />
 
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-1/4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-1">
               <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
                 <JobFilters categories={categories} />
               </Suspense>
             </div>
 
-            <div className="w-full md:w-3/4">
+            <div className="lg:col-span-3">
               <Suspense
                 fallback={
                   <div className="space-y-4">
@@ -62,7 +68,7 @@ export default async function JobsPage({
                   </div>
                 }
               >
-                <JobList initialJobs={jobs} />
+                <JobList initialJobs={jobsResult.data} initialCursor={jobsResult.nextCursor} />
               </Suspense>
             </div>
           </div>

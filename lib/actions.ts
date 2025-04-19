@@ -612,18 +612,39 @@ export async function deleteJob(id: number) {
   }
 }
 
-// Fungsi untuk mencari lowongan
-export async function searchJobs(
-  query?: string,
-  location?: string | string[],
-  jobType?: string | string[],
-  categoryId?: string | string[],
-  salaryMin?: string,
-  salaryMax?: string,
-) {
+interface SearchJobsParams {
+  query?: string
+  location?: string | string[]
+  jobType?: string | string[]
+  categoryId?: string | string[]
+  salaryMin?: string
+  salaryMax?: string
+  cursor?: string
+  limit?: number
+}
+
+export async function searchJobs({
+  query,
+  location,
+  jobType,
+  categoryId,
+  salaryMin,
+  salaryMax,
+  cursor,
+  limit = 10,
+}: SearchJobsParams) {
   try {
     const supabase = getSupabaseAdmin()
-    console.log("Searching jobs with params:", { query, location, jobType, categoryId, salaryMin, salaryMax })
+    console.log("Searching jobs with params:", {
+      query,
+      location,
+      jobType,
+      categoryId,
+      salaryMin,
+      salaryMax,
+      cursor,
+      limit,
+    })
 
     let queryBuilder = supabase
       .from("jobs")
@@ -633,78 +654,102 @@ export async function searchJobs(
         category:job_categories(*)
       `)
       .eq("status", "active")
-      .order("posted_at", { ascending: false })
 
-    // Filter berdasarkan query (judul lowongan atau nama perusahaan)
-    if (query && query.trim() !== "") {
-      queryBuilder = queryBuilder.or(`title.ilike.%${query}%,companies.name.ilike.%${query}%`)
+    // Implementasi cursor-based pagination
+    if (cursor) {
+      queryBuilder = queryBuilder.lt("posted_at", cursor)
     }
 
-    // Filter berdasarkan lokasi
+    // Pencarian Full-Text dengan ranking
+    if (query && query.trim()) {
+      const searchQuery = query.trim()
+      queryBuilder = queryBuilder
+        .textSearch(
+          "tsv",
+          searchQuery
+            .split(/\s+/)
+            .map(term => term + ":*")
+            .join(" & "),
+          {
+            config: "indonesian",
+            type: "websearch",
+          }
+        )
+        .order("is_featured", { ascending: false })
+        .order("posted_at", { ascending: false })
+    } else {
+      // Jika tidak ada query pencarian, urutkan berdasarkan featured dan tanggal
+      queryBuilder = queryBuilder
+        .order("is_featured", { ascending: false })
+        .order("posted_at", { ascending: false })
+    }
+
+    // Filter lokasi menggunakan GIN index
     if (location) {
       if (Array.isArray(location)) {
-        if (location.length === 1) {
-          queryBuilder = queryBuilder.ilike("location", `%${location[0]}%`)
-        } else if (location.length > 1) {
-          const locationFilters = location.map((loc) => `location.ilike.%${loc}%`)
-          queryBuilder = queryBuilder.or(locationFilters.join(","))
-        }
+        queryBuilder = queryBuilder.in("location", location)
       } else {
         queryBuilder = queryBuilder.ilike("location", `%${location}%`)
       }
     }
 
-    // Filter berdasarkan tipe pekerjaan
-    if (jobType) {
+    // Filter tipe pekerjaan menggunakan B-tree index
+    if (jobType && jobType !== "all") {
       if (Array.isArray(jobType)) {
-        if (jobType.length === 1) {
-          queryBuilder = queryBuilder.eq("job_type", jobType[0])
-        } else if (jobType.length > 1) {
-          queryBuilder = queryBuilder.in("job_type", jobType)
-        }
-      } else if (jobType !== "all") {
+        queryBuilder = queryBuilder.in("job_type", jobType)
+      } else {
         queryBuilder = queryBuilder.eq("job_type", jobType)
       }
     }
 
-    // Filter berdasarkan kategori
+    // Filter kategori menggunakan B-tree index
     if (categoryId) {
       if (Array.isArray(categoryId)) {
-        if (categoryId.length === 1) {
-          queryBuilder = queryBuilder.eq("category_id", categoryId[0])
-        } else if (categoryId.length > 1) {
-          queryBuilder = queryBuilder.in("category_id", categoryId)
-        }
+        queryBuilder = queryBuilder.in("category_id", categoryId)
       } else {
         queryBuilder = queryBuilder.eq("category_id", categoryId)
       }
     }
 
-    // Filter berdasarkan gaji
+    // Filter gaji
     if (salaryMin) {
-      // Implementasi filter gaji minimum
-      // Ini adalah pendekatan sederhana, dalam kasus nyata mungkin perlu logika yang lebih kompleks
-      // tergantung pada bagaimana data gaji disimpan
       queryBuilder = queryBuilder.gte("salary_min", Number.parseInt(salaryMin) * 1000000)
     }
 
     if (salaryMax) {
-      // Implementasi filter gaji maksimum
       queryBuilder = queryBuilder.lte("salary_max", Number.parseInt(salaryMax) * 1000000)
     }
+
+    // Terapkan limit untuk pagination
+    queryBuilder = queryBuilder.limit(limit)
 
     const { data, error } = await queryBuilder
 
     if (error) {
       console.error("Error searching jobs:", error)
-      return []
+      return {
+        data: [],
+        nextCursor: null,
+        error: error.message,
+      }
     }
 
+    // Tentukan cursor berikutnya dari item terakhir
+    const nextCursor = data.length === limit ? data[data.length - 1].posted_at : null
+
     console.log(`Found ${data?.length || 0} jobs matching criteria`)
-    return data || []
+    return {
+      data: data || [],
+      nextCursor,
+      error: null,
+    }
   } catch (error) {
     console.error("Unexpected error searching jobs:", error)
-    return []
+    return {
+      data: [],
+      nextCursor: null,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    }
   }
 }
 
