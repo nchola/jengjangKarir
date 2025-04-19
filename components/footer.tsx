@@ -118,24 +118,6 @@ const Footer = () => {
                   Pasang Lowongan
                 </Link>
               </li>
-              <li>
-                <Link href="/pricing" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
-                  Harga & Paket
-                </Link>
-              </li>
-              <li>
-                <Link href="/employer-branding" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
-                  Employer Branding
-                </Link>
-              </li>
-              <li>
-                <Link href="/success-stories" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
-                  Kisah Sukses
-                </Link>
-              </li>
             </ul>
           </div>
 

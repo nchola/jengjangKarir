@@ -13,10 +13,15 @@ import { useSupabase } from "@/components/supabase-provider"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle } from "lucide-react"
 import type { Company } from "@/types/job"
-import { deleteCompany } from "@/lib/company-actions" // Fixed import path
+import { deleteCompany } from "@/lib/company-actions"
+import { getJobsByCompany } from "@/lib/actions"
+
+interface CompanyWithJobs extends Company {
+  total_jobs: number
+}
 
 export default function CompanyTable() {
-  const [companies, setCompanies] = useState<Company[]>([])
+  const [companies, setCompanies] = useState<CompanyWithJobs[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [notification, setNotification] = useState<{
@@ -34,15 +39,27 @@ export default function CompanyTable() {
     setLoading(true)
     try {
       console.log("Fetching companies...")
-      const { data, error } = await supabase.from("companies").select("*").order("name", { ascending: true })
+      const { data, error } = await supabase
+        .from("companies")
+        .select(`
+          *,
+          total_jobs:jobs(count)
+        `)
+        .order("name", { ascending: true })
 
       if (error) {
         console.error("Error fetching companies:", error)
         throw error
       }
 
-      console.log("Companies fetched:", data)
-      setCompanies(data || [])
+      // Transform the data to handle the count properly
+      const transformedData = (data || []).map(company => ({
+        ...company,
+        total_jobs: company.total_jobs?.[0]?.count || 0
+      }))
+
+      console.log("Companies fetched:", transformedData)
+      setCompanies(transformedData)
     } catch (error) {
       console.error("Error fetching companies:", error)
       toast({
@@ -169,6 +186,7 @@ export default function CompanyTable() {
                 <TableHead>Logo</TableHead>
                 <TableHead>Nama</TableHead>
                 <TableHead>Lokasi</TableHead>
+                <TableHead>Total Lowongan</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -199,6 +217,7 @@ export default function CompanyTable() {
                     </TableCell>
                     <TableCell className="font-medium">{company.name}</TableCell>
                     <TableCell>{company.location || "-"}</TableCell>
+                    <TableCell>{company.total_jobs}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

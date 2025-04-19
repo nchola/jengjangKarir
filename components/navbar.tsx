@@ -29,7 +29,6 @@ const Navbar = () => {
     },
     { name: "Perusahaan", href: "/companies" },
     { name: "Artikel", href: "/articles" },
-    { name: "Tentang Kami", href: "/about" },
   ]
 
   return (

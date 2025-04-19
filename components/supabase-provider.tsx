@@ -20,13 +20,9 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
 // Create a single instance of the Supabase client
 const createSupabaseClient = () => {
   const { url, anonKey } = config.supabase
-  
-  console.log("Creating Supabase client with URL:", url ? url.substring(0, 20) + "..." : "Not set")
-  console.log("Supabase Anon Key available:", !!anonKey)
 
   try {
     if (!validateConfig()) {
-      console.warn("Supabase configuration is invalid. Creating minimal client.")
       return createClient<Database>("https://example.supabase.co", "dummy-key", {
         auth: { persistSession: false },
       })
@@ -39,7 +35,6 @@ const createSupabaseClient = () => {
       },
     })
   } catch (error) {
-    console.error("Error creating Supabase client:", error)
     return createClient<Database>("https://example.supabase.co", "dummy-key", {
       auth: { persistSession: false },
     })
@@ -58,22 +53,17 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       if (connectionTested) return
 
       try {
-        console.log("Testing Supabase connection...")
-
         // Simple ping test
         const { data, error } = await supabase.from("companies").select("count()", { count: "exact", head: true })
 
         if (error) {
-          console.error("Supabase connection test failed:", error)
           setConnectionError(error.message)
           setIsConnected(false)
         } else {
-          console.log("Supabase connection test successful")
           setIsConnected(true)
           setConnectionError(null)
         }
       } catch (err: any) {
-        console.error("Unexpected error testing Supabase connection:", err)
         setConnectionError(err?.message || "Unknown connection error")
         setIsConnected(false)
       } finally {
