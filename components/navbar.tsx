@@ -22,6 +22,8 @@ const Navbar = () => {
       href: "/jobs",
       dropdown: [
         { name: "Semua Lowongan", href: "/jobs" },
+        { name: "Lowongan Terbaru", href: "/jobs/latest" },
+        { name: "Lowongan Unggulan", href: "/jobs/featured" },
         { name: "Lowongan IT", href: "/jobs/category/teknologi-informasi" },
         { name: "Lowongan Finance", href: "/jobs/category/keuangan" },
         { name: "Lowongan Marketing", href: "/jobs/category/marketing" },
