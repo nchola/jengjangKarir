@@ -15,30 +15,8 @@ const Footer = () => {
       </div>
 
       <div className="container mx-auto px-3 py-8 sm:py-12 relative">
-        {/* Newsletter section */}
-        <div className="bg-gradient-to-r from-indigo-600 to-teal-500 rounded-xl p-4 sm:p-6 mb-8 shadow-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Dapatkan Lowongan Terbaru</h3>
-              <p className="text-white/80 text-xs sm:text-sm">
-                Berlangganan newsletter kami untuk mendapatkan info lowongan terbaru.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                type="email"
-                placeholder="Email Anda"
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/60 h-10"
-              />
-              <Button className="bg-white text-indigo-600 hover:bg-white/90 h-10 text-xs sm:text-sm">
-                Berlangganan <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
         {/* Main footer content - horizontal layout */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="inline-block mb-4">
               <span className="text-xl sm:text-2xl font-bold">
@@ -141,6 +119,24 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
+          </div>
+
+          {/* Newsletter section */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3 text-teal-400">Newsletter</h3>
+            <p className="text-gray-400 text-xs mb-3">
+              Dapatkan info lowongan terbaru langsung ke email Anda.
+            </p>
+            <div className="space-y-2">
+              <Input
+                type="email"
+                placeholder="Email Anda"
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-8 text-xs"
+              />
+              <Button className="w-full bg-gradient-to-r from-indigo-600 to-teal-500 hover:from-indigo-700 hover:to-teal-600 h-8 text-xs">
+                Berlangganan <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </div>
 

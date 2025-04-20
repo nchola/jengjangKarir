@@ -22,37 +22,37 @@ function TextScene() {
 
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[1, 1, 1]} intensity={1} />
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[1, 1, 3]} intensity={1} />
       <Center>
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+        <Float speed={3} rotationIntensity={0.7} floatIntensity={0.5}>
           <group ref={textRef}>
             <Text3D
-              font="/fonts/helvetiker_regular.typeface.json"
-              size={0.8}
+              font="/fonts/Inter_Bold.typeface.json"
+              size={0.7}
               height={0.12}
               curveSegments={12}
               bevelEnabled
               bevelThickness={0.02}
               bevelSize={0.02}
               bevelOffset={0}
-              bevelSegments={5}
+              bevelSegments={1}
               position={[0, 0.4, 0]}
             >
               Jenjang
-              <meshStandardMaterial color="#1CC5AE" roughness={0.2} metalness={0.8} />
+              <meshStandardMaterial color="#1CC5AE" roughness={0.4} metalness={0.8} />
             </Text3D>
             <Text3D
-              font="/fonts/helvetiker_regular.typeface.json"
-              size={0.8}
+              font="/fonts/Inter_Bold.typeface.json"
+              size={0.7}
               height={0.12}
               curveSegments={12}
               bevelEnabled
-              bevelThickness={0.02}
+              bevelThickness={0.04}
               bevelSize={0.02}
               bevelOffset={0}
               bevelSegments={5}
-              position={[0, -0.4, 0]}
+              position={[0.2, -0.5, 0]}
             >
               Karir
               <meshStandardMaterial color="#5A4FCF" roughness={0.2} metalness={0.8} />
