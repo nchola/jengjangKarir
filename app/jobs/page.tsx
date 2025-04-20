@@ -40,7 +40,7 @@ export default async function JobsPage({
     <main className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="bg-blue-600 py-12">
+      <div className="bg-gradient-to-r from-indigo-600 to-teal-500 py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-white mb-6">Temukan Lowongan Kerja</h1>
           <SearchBar />

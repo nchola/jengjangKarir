@@ -1,9 +1,10 @@
 "use client"
 import Link from "next/link"
-import { Instagram, Linkedin, ArrowRight, Mail, Phone, MessageSquare } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import LoadingClock from "@/components/LoadingClock"
+import { SocialMedia } from "./SocialMedia"
 
 const Footer = () => {
   return (
@@ -28,43 +29,7 @@ const Footer = () => {
               Platform lowongan kerja terpercaya yang menghubungkan pencari kerja dengan perusahaan terbaik di
               Indonesia.
             </p>
-            <div className="flex space-x-3">
-              <a
-                href="#"
-                className="bg-purple-600 p-1.5 rounded-full text-white hover:bg-purple-700 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram size={16} />
-              </a>
-              <a
-                href="#"
-                className="bg-blue-600 p-1.5 rounded-full text-white hover:bg-blue-700 transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={16} />
-              </a>
-              <a
-                href="#"
-                className="bg-blue-500 p-1.5 rounded-full text-white hover:bg-blue-600 transition-colors"
-                aria-label="Telegram"
-              >
-                <MessageSquare size={16} />
-              </a>
-              <a
-                href="mailto:info@jenjangkarir.id"
-                className="bg-pink-500 p-1.5 rounded-full text-white hover:bg-pink-600 transition-colors"
-                aria-label="Email"
-              >
-                <Mail size={16} />
-              </a>
-              <a
-                href="tel:+6281234567890"
-                className="bg-green-500 p-1.5 rounded-full text-white hover:bg-green-600 transition-colors"
-                aria-label="Phone"
-              >
-                <Phone size={16} />
-              </a>
-            </div>
+            <SocialMedia />
           </div>
 
           <div>
