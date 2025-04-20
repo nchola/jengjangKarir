@@ -1,164 +1,154 @@
+"use client"
 import Link from "next/link"
-import { Facebook, Twitter, Instagram, Linkedin, ArrowRight, Mail } from "lucide-react"
+import { Instagram, Linkedin, ArrowRight, Mail, Phone, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import LoadingClock from "@/components/LoadingClock"
 
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-gray-900 to-gray-950 text-white relative overflow-hidden">
       {/* Abstract shapes */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500 rounded-full filter blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 translate-y-1/2"></div>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-teal-500 rounded-full filter blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-indigo-500 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 translate-y-1/2"></div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 relative">
+      <div className="container mx-auto px-3 py-8 sm:py-12 relative">
         {/* Newsletter section */}
-        <div className="bg-gradient-to-r from-indigo-600 to-teal-500 rounded-2xl p-8 mb-16 shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="bg-gradient-to-r from-indigo-600 to-teal-500 rounded-xl p-4 sm:p-6 mb-8 shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
             <div>
-              <h3 className="text-2xl font-bold mb-2">Dapatkan Lowongan Terbaru</h3>
-              <p className="text-white/80">
-                Berlangganan newsletter kami untuk mendapatkan info lowongan terbaru dan tips karir.
+              <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Dapatkan Lowongan Terbaru</h3>
+              <p className="text-white/80 text-xs sm:text-sm">
+                Berlangganan newsletter kami untuk mendapatkan info lowongan terbaru.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="email"
                 placeholder="Email Anda"
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/60 h-12"
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60 h-10"
               />
-              <Button className="bg-white text-indigo-600 hover:bg-white/90 h-12">
-                Berlangganan <ArrowRight className="ml-2 h-4 w-4" />
+              <Button className="bg-white text-indigo-600 hover:bg-white/90 h-10 text-xs sm:text-sm">
+                Berlangganan <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-1">
-            <Link href="/" className="inline-block mb-6">
-              <span className="text-3xl font-bold">
+        {/* Main footer content - horizontal layout */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-8">
+          <div className="col-span-2 sm:col-span-1">
+            <Link href="/" className="inline-block mb-4">
+              <span className="text-xl sm:text-2xl font-bold">
                 <span className="text-teal-400">Jenjang</span>
                 <span className="text-white">Karir</span>
               </span>
             </Link>
-            <p className="text-gray-400 mb-6">
+            <p className="text-gray-400 mb-4 text-xs sm:text-sm">
               Platform lowongan kerja terpercaya yang menghubungkan pencari kerja dengan perusahaan terbaik di
               Indonesia.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               <a
                 href="#"
-                className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-teal-500 transition-colors"
+                className="bg-purple-600 p-1.5 rounded-full text-white hover:bg-purple-700 transition-colors"
+                aria-label="Instagram"
               >
-                <Facebook size={20} />
-                <span className="sr-only">Facebook</span>
+                <Instagram size={16} />
               </a>
               <a
                 href="#"
-                className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-teal-500 transition-colors"
+                className="bg-blue-600 p-1.5 rounded-full text-white hover:bg-blue-700 transition-colors"
+                aria-label="LinkedIn"
               >
-                <Twitter size={20} />
-                <span className="sr-only">Twitter</span>
+                <Linkedin size={16} />
               </a>
               <a
                 href="#"
-                className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-teal-500 transition-colors"
+                className="bg-blue-500 p-1.5 rounded-full text-white hover:bg-blue-600 transition-colors"
+                aria-label="Telegram"
               >
-                <Instagram size={20} />
-                <span className="sr-only">Instagram</span>
+                <MessageSquare size={16} />
               </a>
               <a
-                href="#"
-                className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-teal-500 transition-colors"
+                href="mailto:info@jenjangkarir.id"
+                className="bg-pink-500 p-1.5 rounded-full text-white hover:bg-pink-600 transition-colors"
+                aria-label="Email"
               >
-                <Linkedin size={20} />
-                <span className="sr-only">LinkedIn</span>
+                <Mail size={16} />
+              </a>
+              <a
+                href="tel:+6281234567890"
+                className="bg-green-500 p-1.5 rounded-full text-white hover:bg-green-600 transition-colors"
+                aria-label="Phone"
+              >
+                <Phone size={16} />
               </a>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-6 text-teal-400">Untuk Pencari Kerja</h3>
-            <ul className="space-y-4">
+            <h3 className="text-sm font-semibold mb-3 text-teal-400">Untuk Pencari Kerja</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/jobs" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
+                <Link href="/jobs" className="text-gray-400 hover:text-teal-400 flex items-center text-xs sm:text-sm">
+                  <ArrowRight className="mr-1 h-3 w-3 text-teal-500" />
                   Cari Lowongan
                 </Link>
               </li>
               <li>
-                <Link href="/companies" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
+                <Link
+                  href="/companies"
+                  className="text-gray-400 hover:text-teal-400 flex items-center text-xs sm:text-sm"
+                >
+                  <ArrowRight className="mr-1 h-3 w-3 text-teal-500" />
                   Perusahaan
                 </Link>
               </li>
               <li>
-                <Link href="/articles" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
+                <Link
+                  href="/articles"
+                  className="text-gray-400 hover:text-teal-400 flex items-center text-xs sm:text-sm"
+                >
+                  <ArrowRight className="mr-1 h-3 w-3 text-teal-500" />
                   Artikel Karir
                 </Link>
               </li>
-              <li>
-                <Link href="/salary" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
-                  Info Gaji
-                </Link>
-              </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-6 text-teal-400">Untuk Perusahaan</h3>
-            <ul className="space-y-4">
+            <h3 className="text-sm font-semibold mb-3 text-teal-400">Untuk Perusahaan</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/post-job" className="text-gray-400 hover:text-teal-400 flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-teal-500" />
+                <Link
+                  href="/post-job"
+                  className="text-gray-400 hover:text-teal-400 flex items-center text-xs sm:text-sm"
+                >
+                  <ArrowRight className="mr-1 h-3 w-3 text-teal-500" />
                   Pasang Lowongan
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-6 text-teal-400">Hubungi Kami</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start">
-                <Mail className="mr-2 h-5 w-5 text-teal-500 mt-0.5" />
-                <span className="text-gray-400">info@jenjangkarir.id</span>
-              </li>
               <li>
-                <p className="text-gray-400">
-                  Jl. HR. Rasuna Said Kav. C-22,
-                  <br />
-                  Jakarta Selatan, 12940
-                  <br />
-                  Indonesia
-                </p>
+                <Link
+                  href="/pricing"
+                  className="text-gray-400 hover:text-teal-400 flex items-center text-xs sm:text-sm"
+                >
+                  <ArrowRight className="mr-1 h-3 w-3 text-teal-500" />
+                  Harga Layanan
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-500 text-sm mb-4 md:mb-0">
+        <div className="border-t border-gray-800 pt-4 flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-500 text-xs mb-3 sm:mb-0">
             &copy; {new Date().getFullYear()} JenjangKarir. Hak Cipta Dilindungi.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-            <Link href="/about" className="text-gray-500 hover:text-teal-400 text-sm">
-              Tentang Kami
-            </Link>
-            <Link href="/contact" className="text-gray-500 hover:text-teal-400 text-sm">
-              Hubungi Kami
-            </Link>
-            <Link href="/privacy" className="text-gray-500 hover:text-teal-400 text-sm">
-              Kebijakan Privasi
-            </Link>
-            <Link href="/terms" className="text-gray-500 hover:text-teal-400 text-sm">
-              Syarat & Ketentuan
-            </Link>
-          </div>
+          <LoadingClock />
         </div>
       </div>
     </footer>
