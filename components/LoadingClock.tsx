@@ -1,27 +1,18 @@
 "use client"
-import { useEffect, useState } from 'react'
+
+import { useEffect, useState } from "react"
 
 const LoadingClock = () => {
-  // Initialize with empty strings to avoid hydration mismatch
-  const [hours, setHours] = useState('--')
-  const [minutes, setMinutes] = useState('--')
-  const [seconds, setSeconds] = useState('--')
+  const [time, setTime] = useState("")
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
-    // Update time immediately on mount
-    const updateTime = () => {
+    const timer = setInterval(() => {
       const now = new Date()
-      setHours(now.getHours().toString().padStart(2, '0'))
-      setMinutes(now.getMinutes().toString().padStart(2, '0'))
-      setSeconds(now.getSeconds().toString().padStart(2, '0'))
-    }
-
-    // Initial update
-    updateTime()
-
-    // Set up interval
-    const timer = setInterval(updateTime, 1000)
+      const hours = now.getHours().toString().padStart(2, "0")
+      const minutes = now.getMinutes().toString().padStart(2, "0")
+      setTime(`${hours}:${minutes}`)
+    }, 1000)
 
     return () => clearInterval(timer)
   }, [])
@@ -32,27 +23,28 @@ const LoadingClock = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Hover effect background */}
+      {/* Background gradient animation */}
       <div className={`
         absolute inset-0 rounded-lg transition-all duration-300
-        ${isHovered ? 'bg-gradient-to-r from-green-500/20 via-teal-500/20 to-emerald-500/20 blur-sm' : ''}
+        ${isHovered ? 'bg-gradient-to-r from-teal-500/20 via-indigo-500/20 to-teal-500/20 blur-sm' : ''}
       `} />
       
       {/* Time display */}
-      <div className="flex items-center gap-2 relative">
-        <div className="flex items-center gap-1 bg-green-600/20 px-3 py-1 rounded-lg backdrop-blur-sm">
-          <div className="text-sm font-medium text-green-400">{hours}:{minutes}</div>
-          <div className="text-xs text-green-300">{seconds}s</div>
+      <div className="relative flex items-center gap-2">
+        <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-4 py-2 rounded-lg backdrop-blur-sm border border-gray-800">
+          <div className="text-base font-medium bg-gradient-to-r from-teal-400 to-indigo-400 bg-clip-text text-transparent">
+            {time}
+          </div>
         </div>
         
-        {/* Loading animation */}
+        {/* Loading dots animation */}
         <div className="flex items-center gap-1">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
               className={`
-                w-1.5 h-1.5 rounded-full transition-colors duration-300
-                ${isHovered ? 'bg-emerald-400' : 'bg-green-400'}
+                w-1 h-1 rounded-full transition-colors duration-300
+                ${isHovered ? 'bg-indigo-400' : 'bg-teal-400'}
                 animate-pulse
               `}
               style={{
@@ -62,9 +54,9 @@ const LoadingClock = () => {
           ))}
         </div>
 
-        {/* Hover effect dots */}
+        {/* Hover effect glow */}
         {isHovered && (
-          <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-green-500/20 via-teal-500/20 to-emerald-500/20 blur-sm animate-pulse" />
+          <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-teal-500/20 via-indigo-500/20 to-teal-500/20 blur-sm animate-pulse" />
         )}
       </div>
     </div>

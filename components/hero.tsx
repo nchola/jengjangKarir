@@ -14,33 +14,7 @@ const Hero = () => {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-indigo-400 rounded-full filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2"></div>
       </div>
 
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:20px_20px]"></div>
-
-      {/* Animated arrow */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 mb-4">
-        <svg 
-          width="200" 
-          height="20" 
-          viewBox="0 0 200 20" 
-          className="animate-bounce opacity-50"
-        >
-          <path 
-            d="M100 20 L90 10 L110 10 Z" 
-            fill="none" 
-            stroke="white" 
-            strokeWidth="2"
-            className="animate-pulse"
-          />
-          <path 
-            d="M0 10 H200" 
-            stroke="white" 
-            strokeWidth="2"
-            strokeDasharray="2 4"
-            className="animate-wave"
-          />
-        </svg>
-      </div>
+      
 
       <div className="container relative mx-auto px-4 py-8 md:py-16 lg:py-24 pb-28 sm:pb-40">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
@@ -74,7 +48,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/jobs">
                 <Button size="default" className="bg-teal-500 hover:bg-teal-600 text-white border-0 w-full sm:w-auto">
-                  Cari Lowongan
+                  Lowongan
                 </Button>
               </Link>
               <div className="block sm:hidden">
