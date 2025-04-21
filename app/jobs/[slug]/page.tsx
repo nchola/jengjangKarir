@@ -50,19 +50,19 @@ export default async function JobDetailPage({ params }: { params: { slug: string
           <div className="lg:col-span-2 space-y-6">
             {/* Header Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="relative h-16 w-16 flex-shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-teal-50 rounded-lg"></div>
+              <div className="flex flex-col md:flex-row items-start gap-6 mb-4">
+                <div className="relative h-48 w-48 flex-shrink-0 mx-auto md:mx-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-teal-50 rounded-xl"></div>
                   <img
                     src={job.company.logo_url || "/placeholder.svg"}
                     alt={`${job.company.name} logo`}
-                    className="absolute inset-0 w-full h-full object-contain p-2"
+                    className="absolute inset-0 w-full h-full object-contain p-4"
                   />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-1">{job.title}</h1>
-                  <p className="text-lg text-gray-600 mb-2">{job.company.name}</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex-1 min-w-0 text-center md:text-left">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{job.title}</h1>
+                  <p className="text-xl text-gray-600 mb-3">{job.company.name}</p>
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                     <Badge variant="secondary" className="bg-teal-50 text-teal-700 hover:bg-teal-100">
                       {job.job_type}
                     </Badge>
@@ -121,6 +121,41 @@ export default async function JobDetailPage({ params }: { params: { slug: string
                   </Button>
                 </div>
               </div>
+            </div>
+
+            {/* Company Card - Moved here for mobile view */}
+            <div className="lg:hidden bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tentang Perusahaan</h2>
+              {job.company.background && (
+                <p className="text-sm text-gray-600 mb-4">{job.company.background}</p>
+              )}
+              <div className="space-y-3">
+                {job.company.industry && (
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{job.company.industry}</span>
+                  </div>
+                )}
+                {job.company.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{job.company.location}</span>
+                  </div>
+                )}
+                {job.company.company_size && (
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{job.company.company_size} karyawan</span>
+                  </div>
+                )}
+              </div>
+              {job.company.website && (
+                <Button variant="outline" className="w-full mt-4" asChild>
+                  <Link href={`/companies/${job.company.slug}`}>
+                    Profil Perusahaan
+                  </Link>
+                </Button>
+              )}
             </div>
 
             {/* Job Description */}
@@ -186,8 +221,8 @@ export default async function JobDetailPage({ params }: { params: { slug: string
               </div>
             </div>
 
-            {/* Company Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            {/* Company Card - Hidden on mobile, shown on desktop */}
+            <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Tentang Perusahaan</h2>
               {job.company.background && (
                 <p className="text-sm text-gray-600 mb-4">{job.company.background}</p>
@@ -215,7 +250,7 @@ export default async function JobDetailPage({ params }: { params: { slug: string
               {job.company.website && (
                 <Button variant="outline" className="w-full mt-4" asChild>
                   <Link href={`/companies/${job.company.slug}`}>
-                    Lihat Profil Perusahaan
+                    Profil Perusahaan
                   </Link>
                 </Button>
               )}
@@ -230,24 +265,24 @@ export default async function JobDetailPage({ params }: { params: { slug: string
                     <a 
                       key={relatedJob.id}
                       href={`/jobs/${relatedJob.slug}`}
-                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <div className="relative h-10 w-10 flex-shrink-0">
+                      <div className="relative h-20 w-20 flex-shrink-0">
                         <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg"></div>
                         <img
                           src={relatedJob.company.logo_url || "/placeholder.svg"}
                           alt={`${relatedJob.company.name} logo`}
-                          className="absolute inset-0 w-full h-full object-contain p-2"
+                          className="absolute inset-0 w-full h-full object-contain p-3"
                         />
                       </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900 text-sm">{relatedJob.title}</h3>
-                        <p className="text-xs text-gray-600">{relatedJob.company.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900 text-base mb-1">{relatedJob.title}</h3>
+                        <p className="text-sm text-gray-600 mb-2">{relatedJob.company.name}</p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Badge variant="secondary" className="text-sm">
                             {relatedJob.job_type}
                           </Badge>
-                          <span className="text-xs text-gray-500">{relatedJob.location}</span>
+                          <span className="text-sm text-gray-500">{relatedJob.location}</span>
                         </div>
                       </div>
                     </a>
