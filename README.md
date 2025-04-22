@@ -4,6 +4,16 @@
 
 JenjangKarir adalah platform pencarian lowongan kerja modern yang dibangun dengan teknologi terkini. Platform ini memungkinkan pencari kerja untuk menemukan lowongan yang sesuai, sementara perusahaan dapat mempromosikan posisi yang mereka tawarkan.
 
+![image](https://github.com/user-attachments/assets/8799b8c2-d172-4cc2-b5ee-fb948d9dc3f7)
+![image](https://github.com/user-attachments/assets/6dc624ca-6547-4142-9625-7496c10a7593)
+![image](https://github.com/user-attachments/assets/05f19982-dfb7-45fd-acfe-21f1b295231c)
+![image](https://github.com/user-attachments/assets/bbcf2478-a2b8-4117-8363-f5740d1c275d)
+![image](https://github.com/user-attachments/assets/1f4a9879-0ee5-420a-9084-82f81bf00634)
+![image](https://github.com/user-attachments/assets/933be92e-66af-4457-9f92-9045dab19f55)
+![image](https://github.com/user-attachments/assets/54ee8e41-63c8-40dd-91ad-f006bfc64869)
+
+
+
 ## 🛠 Teknologi yang Digunakan
 
 ### Frontend
