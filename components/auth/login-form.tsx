@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
-import { loginUser } from "@/lib/user-actions"
-
+import { loginUser } from "@/lib/auth-actions"
 // Form validation schema
 const loginSchema = z.object({
   email: z.string().email("Email tidak valid"),

@@ -20,6 +20,7 @@ import { formatDate } from "@/lib/utils"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Link from "next/link"
+import ServiceBanner from "@/components/ServiceBanner"
 
 export const metadata: Metadata = {
   title: "Detail Lowongan | JenjangKarir",
@@ -123,40 +124,8 @@ export default async function JobDetailPage({ params }: { params: { slug: string
               </div>
             </div>
 
-            {/* Company Card - Moved here for mobile view */}
-            <div className="lg:hidden bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tentang Perusahaan</h2>
-              {job.company.background && (
-                <p className="text-sm text-gray-600 mb-4">{job.company.background}</p>
-              )}
-              <div className="space-y-3">
-                {job.company.industry && (
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{job.company.industry}</span>
-                  </div>
-                )}
-                {job.company.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{job.company.location}</span>
-                  </div>
-                )}
-                {job.company.company_size && (
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{job.company.company_size} karyawan</span>
-                  </div>
-                )}
-              </div>
-              {job.company.website && (
-                <Button variant="outline" className="w-full mt-4" asChild>
-                  <Link href={`/companies/${job.company.slug}`}>
-                    Profil Perusahaan
-                  </Link>
-                </Button>
-              )}
-            </div>
+            {/* Service Banner */}
+            <ServiceBanner />
 
             {/* Job Description */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
