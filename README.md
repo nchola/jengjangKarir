@@ -1,78 +1,131 @@
-# JengjangKarir
+# JenjangKarir - Platform Pencarian Lowongan Kerja
 
-JengjangKarir is a modern career platform built with cutting-edge technology to assist users in their career journey, combining modern features with an intuitive and responsive interface.
-## 🚀 Features
+## 🚀 Tentang Proyek
 
-- Modern and responsive UI components using Radix UI
-- Dark/Light theme support with next-themes
-- Form handling with react-hook-form and zod validation
-- Data visualization with Recharts
-- Authentication and data storage with Supabase
-- Markdown support
-- Beautiful animations with tailwindcss-animate
-- Fully typed with TypeScript
+JenjangKarir adalah platform pencarian lowongan kerja modern yang dibangun dengan teknologi terkini. Platform ini memungkinkan pencari kerja untuk menemukan lowongan yang sesuai, sementara perusahaan dapat mempromosikan posisi yang mereka tawarkan.
 
-## 🛠️ Tech Stack
+## 🛠 Teknologi yang Digunakan
 
-- **Framework:** Next.js 15
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** Radix UI
-- **State Management:** React Hook Form
-- **Database:** Supabase
-- **Authentication:** Supabase Auth
-- **Deployment:** Vercel (recommended)
+### Frontend
+- **Next.js 15** - Framework React untuk aplikasi web modern
+- **React 19** - Library JavaScript untuk membangun antarmuka pengguna
+- **TypeScript** - Superset JavaScript dengan pengetikan statis
+- **Tailwind CSS** - Framework CSS utility-first
+- **Radix UI** - Komponen UI yang dapat diakses
+- **Framer Motion** - Library animasi
+- **React Hook Form** - Manajemen form
+- **Zod** - Validasi schema
 
-## 📦 Installation
+### Backend & Database
+- **Supabase** - Backend-as-a-Service dengan PostgreSQL
+- **PostgreSQL** - Database relasional
+- **Prisma** - ORM untuk TypeScript
 
-1. Clone the repository:
-```bash
-git clone https://github.com/nchola/jengjangKarir.git
-cd jengjangKarir
+### Fitur Keamanan
+- **bcryptjs** - Enkripsi password
+- **NextAuth.js** - Autentikasi
+- **CORS** - Keamanan lintas domain
+
+## 🏗 Arsitektur & Teknik Implementasi
+
+### 1. Database & Query Optimization
+- **Indexing**: Implementasi indeks untuk optimasi pencarian
+  ```sql
+  CREATE INDEX idx_jobs_title ON jobs (title);
+  CREATE INDEX idx_jobs_location ON jobs (location);
+  ```
+- **Query Builder Pattern**: Implementasi pattern untuk membangun query yang fleksibel
+- **Relasi Database**: Struktur relasi yang terorganisir antara tabel jobs, companies, dan categories
+
+### 2. Caching & Performa
+- **Server-Side Rendering (SSR)**: Implementasi Next.js untuk rendering di server
+- **Static Site Generation (SSG)**: Untuk halaman yang jarang berubah
+- **Incremental Static Regeneration (ISR)**: Untuk konten yang perlu diperbarui secara berkala
+
+### 3. Keamanan
+- **Environment Variables**: Pengelolaan konfigurasi sensitif
+- **Role-Based Access Control**: Pembagian akses berdasarkan peran
+- **Data Validation**: Validasi input dengan Zod
+
+### 4. UX/UI
+- **Responsive Design**: Tampilan yang responsif untuk semua perangkat
+- **Dark Mode**: Dukungan tema gelap
+- **Accessibility**: Komponen yang dapat diakses dengan Radix UI
+- **Animasi**: Transisi dan animasi dengan Framer Motion
+
+## 📁 Struktur Proyek
+
+```
+jengjangkarir/
+├── app/                    # Halaman aplikasi Next.js
+│   ├── admin/             # Panel admin
+│   ├── jobs/              # Halaman lowongan
+│   └── companies/         # Halaman perusahaan
+├── components/            # Komponen UI
+├── lib/                   # Utilitas dan helpers
+├── types/                 # TypeScript types
+├── public/               # Aset statis
+└── sql/                  # Skrip SQL
 ```
 
-2. Install the dependencies:
+## 🚀 Fitur Utama
+
+1. **Pencarian Lowongan**
+   - Filter berdasarkan kategori, lokasi, dan tipe pekerjaan
+   - Pencarian teks bebas
+   - Paginasi hasil pencarian
+
+2. **Manajemen Perusahaan**
+   - Profil perusahaan
+   - Posting lowongan
+   - Manajemen aplikasi
+
+3. **Panel Admin**
+   - Manajemen lowongan
+   - Manajemen perusahaan
+   - Manajemen kategori
+   - Diagnostik sistem
+
+4. **Fitur Pengguna**
+   - Simpan lowongan favorit
+   - Lamaran pekerjaan
+   - Notifikasi
+
+## �� Instalasi & Setup
+
+1. Clone repositori
 ```bash
-pnpm install
+git clone https://github.com/username/jengjangkarir.git
+cd jengjangkarir
 ```
 
-3. Create a `.env` file in the root directory and add your environment variables:
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Setup environment variables
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-4. Start the development server:
+4. Jalankan development server
 ```bash
-pnpm dev
+npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📝 Kontribusi
 
-## 🏗️ Project Structure
+Kontribusi selalu diterima! Silakan buat pull request atau buka issue untuk diskusi.
 
-```
-├── app/                # Next.js app directory
-├── components/         # Reusable UI components
-├── hooks/             # Custom React hooks
-├── lib/              # Utility functions and configurations
-├── public/           # Static assets
-├── styles/           # Global styles and Tailwind CSS config
-├── types/            # TypeScript type definitions
-└── middleware.ts     # Next.js middleware
-```
+## 📄 Lisensi
 
-## 🧩 Available Scripts
+Proyek ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) untuk detail lebih lanjut.
 
-- `pnpm dev` - Run development server
-- `pnpm build` - Build production bundle
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint
+## 📞 Kontak
 
-## 🤝 Contributing
+[Your Name] - [your.email@example.com]
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/nchola/jengjangKarir/issues).
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+Project Link: [https://github.com/yourusername/jengjangkarir](https://github.com/yourusername/jengjangkarir) 
