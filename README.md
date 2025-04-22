@@ -12,10 +12,7 @@ JenjangKarir adalah platform pencarian lowongan kerja modern yang dibangun denga
 ![image](https://github.com/user-attachments/assets/933be92e-66af-4457-9f92-9045dab19f55)
 ![image](https://github.com/user-attachments/assets/54ee8e41-63c8-40dd-91ad-f006bfc64869)
 
-
-
 ## 🛠 Teknologi yang Digunakan
-
 ### Frontend
 - **Next.js 15** - Framework React untuk aplikasi web modern
 - **React 19** - Library JavaScript untuk membangun antarmuka pengguna
@@ -37,7 +34,6 @@ JenjangKarir adalah platform pencarian lowongan kerja modern yang dibangun denga
 - **CORS** - Keamanan lintas domain
 
 ## 🏗 Arsitektur & Teknik Implementasi
-
 ### 1. Database & Query Optimization
 - **Indexing**: Implementasi indeks untuk optimasi pencarian
   ```sql
@@ -79,7 +75,6 @@ jengjangkarir/
 ```
 
 ## 🚀 Fitur Utama
-
 1. **Pencarian Lowongan**
    - Filter berdasarkan kategori, lokasi, dan tipe pekerjaan
    - Pencarian teks bebas
@@ -102,7 +97,6 @@ jengjangkarir/
    - Notifikasi
 
 ## �� Instalasi & Setup
-
 1. Clone repositori
 ```bash
 git clone https://github.com/username/jengjangkarir.git
@@ -127,15 +121,6 @@ npm run dev
 ```
 
 ## 📝 Kontribusi
-
 Kontribusi selalu diterima! Silakan buat pull request atau buka issue untuk diskusi.
 
-## 📄 Lisensi
 
-Proyek ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) untuk detail lebih lanjut.
-
-## 📞 Kontak
-
-[Your Name] - [your.email@example.com]
-
-Project Link: [https://github.com/yourusername/jengjangkarir](https://github.com/yourusername/jengjangkarir) 
