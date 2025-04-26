@@ -14,7 +14,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle } from "lucide-react"
 import type { Company } from "@/types/job"
 import { deleteCompany } from "@/lib/company-actions"
-import { getJobsByCompany } from "@/lib/actions"
 
 interface CompanyWithJobs extends Company {
   total_jobs: number

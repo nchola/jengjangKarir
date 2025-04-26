@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { getSupabaseAdmin } from "./supabase"
 import { slugify } from "./utils"
 import { JobCategory } from '@/lib/types'
+import { cache } from 'react'
 
 // Fungsi untuk mengambil semua lowongan
 export async function getJobs() {
@@ -63,80 +64,125 @@ export async function getFeaturedJobs(limit = 4) {
   }
 }
 
-// Fungsi untuk mengambil lowongan berdasarkan kategori
-export async function getJobsByCategory(categorySlug: string) {
+// Optimized and cached getJobsByCategory function
+export const getJobsByCategory = cache(async (categorySlug: string, limit?: number) => {
+  if (!categorySlug) {
+    console.error("[Server Action] No category slug provided")
+    return []
+  }
+
   try {
     const supabase = getSupabaseAdmin()
-    console.log("[Server Action] Getting jobs for category:", categorySlug)
-
-    // Get category first
-    const { data: category, error: categoryError } = await supabase
-      .from("job_categories")
-      .select("id")
-      .eq("slug", categorySlug)
-      .single()
-
-    if (categoryError || !category) {
-      console.error("[Server Action] Error getting category:", categoryError)
-      return []
-    }
-
-    console.log("[Server Action] Found category with ID:", category.id)
-
-    // Then get jobs for this category
-    const { data: jobs, error: jobsError } = await supabase
+    
+    let query = supabase
       .from("jobs")
       .select(`
-        *,
-        company:companies(name, logo_url),
-        category:job_categories(*)
+        id,
+        title,
+        slug,
+        job_type,
+        location,
+        is_featured,
+        posted_at,
+        company:companies!inner(
+          id,
+          name,
+          logo_url
+        )
       `)
-      .eq("category_id", category.id)
-      .eq("status", "active")
-      .order("is_featured", { ascending: false })
-      .order("posted_at", { ascending: false })
+      .eq('status', 'active')
+      .order('is_featured', { ascending: false })
+      .order('posted_at', { ascending: false })
 
-    if (jobsError) {
-      console.error("[Server Action] Error getting jobs:", jobsError)
+    // First get the category ID
+    const { data: category } = await supabase
+      .from('job_categories')
+      .select('id')
+      .eq('slug', categorySlug)
+      .single()
+
+    if (category) {
+      query = query.eq('category_id', category.id)
+    }
+
+    if (limit) {
+      query = query.limit(limit)
+    }
+
+    const { data: jobs, error } = await query
+
+    if (error) {
+      console.error("[Server Action] Database error:", error.message)
       return []
     }
 
-    console.log("[Server Action] Found jobs:", jobs?.length || 0)
     return jobs || []
   } catch (error) {
     console.error("[Server Action] Error getting jobs by category:", error)
     return []
   }
-}
+})
 
-// Fungsi untuk mengambil detail lowongan
-export async function getJobBySlug(slug: string) {
+// Cache the job detail query
+export const getJobBySlug = cache(async (slug: string) => {
+  if (!slug) {
+    console.error("[Server Action] No slug provided")
+    return null
+  }
+
   try {
     const supabase = getSupabaseAdmin()
-    console.log("[Server Action] Getting job by slug:", slug)
-
+    
     const { data: job, error } = await supabase
       .from("jobs")
       .select(`
-        *,
-        company:companies(*),
-        category:job_categories(*)
+        id,
+        title,
+        slug,
+        location,
+        job_type,
+        salary_display,
+        description,
+        requirements,
+        responsibilities,
+        posted_at,
+        show_salary,
+        is_featured,
+        company:companies!inner(
+          id,
+          name,
+          logo_url,
+          location,
+          company_size,
+          background,
+          website,
+          slug
+        ),
+        category:job_categories(
+          id,
+          name,
+          slug
+        )
       `)
-      .eq("slug", slug)
+      .eq('slug', slug)
       .single()
 
     if (error) {
-      console.error("[Server Action] Error getting job:", error)
+      console.error("[Server Action] Database error:", error.message)
       return null
     }
 
-    console.log("[Server Action] Found job:", job?.title)
+    if (!job) {
+      console.error("[Server Action] Job not found for slug:", slug)
+      return null
+    }
+
     return job
   } catch (error) {
-    console.error("[Server Action] Error getting job:", error)
+    console.error("[Server Action] Unexpected error:", error)
     return null
   }
-}
+})
 
 // Fungsi untuk membuat lowongan baru
 export async function createJob(formData: FormData) {

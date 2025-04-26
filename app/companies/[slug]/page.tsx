@@ -24,8 +24,16 @@ export default async function CompanyDetailPage({ params }: { params: { slug: st
     <main className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="bg-blue-600 py-12">
-        <div className="container mx-auto px-4">
+      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-teal-500 py-12">
+        {/* Background pattern */}
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        
+        {/* Decorative elements */}
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
+        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/10" />
+        
+        {/* Content */}
+        <div className="container relative z-10 mx-auto px-4">
           <h1 className="text-3xl font-bold text-white mb-2">{company.name}</h1>
           {company.location && (
             <div className="flex items-center text-white/80">

@@ -9,6 +9,7 @@ import { useSupabase } from "@/components/supabase-provider"
 import AuthCheck from "@/components/admin/auth-check"
 import DatabaseStatus from "@/components/admin/database-status"
 import MockDataNotice from "@/components/admin/mock-data-notice"
+import RunDiagnostics from "@/components/admin/run-diagnostics"
 
 export default function DiagnosticsPage() {
   const [isLoading, setIsLoading] = useState(true)

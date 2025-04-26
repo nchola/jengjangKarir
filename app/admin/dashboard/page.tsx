@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Briefcase, Building, Tag, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Briefcase, Building, Tag, ArrowUpRight } from "lucide-react"
 import { getJobs, getCategories, getCompanies } from "@/lib/actions"
 import AuthCheck from "@/components/admin/auth-check"
 import { useEffect, useState } from "react"
